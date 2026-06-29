@@ -1,0 +1,218 @@
+"use client";
+
+import Link from "next/link";
+import { useState } from "react";
+import { Eye, EyeOff, Check } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+import { signUpSchema, type SignUpInput } from "@/lib/validations/signup";
+import { useMutation } from "@tanstack/react-query";
+import { signUp } from "@/services/auth";
+import { toast } from "sonner";
+
+export default function SignupPage() {
+  const mutation = useMutation({
+    mutationFn: signUp,
+    onSuccess: () => {
+      toast.success("Account created successfully!");
+
+      form.reset();
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+  const form = useForm<SignUpInput>({
+    resolver: zodResolver(signUpSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+    },
+  });
+  const onSubmit = (data: SignUpInput) => {
+    mutation.mutate(data);
+  };
+
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-12">
+      {/* Decorative blur elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-accent/5 rounded-full blur-3xl" />
+      </div>
+
+      <div className="w-full max-w-md relative z-10">
+        {/* Logo/Branding */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-linear-to-br from-primary to-accent/80 mb-4">
+            <span className="text-white font-bold text-lg">SC</span>
+          </div>
+          <h1 className="text-2xl font-bold text-foreground">Create Account</h1>
+          <p className="text-sm text-muted-foreground mt-2">
+            Start tracking your academic performance
+          </p>
+        </div>
+
+        {/* Signup Card */}
+        <div className="glass-card rounded-2xl p-8 mb-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            {/* Username Field */}
+            <div className="space-y-2">
+              <label
+                htmlFor="username"
+                className="block text-sm font-medium text-foreground"
+              >
+                Username
+              </label>
+              <input
+                type="text"
+                id="username"
+                {...form.register("name")}
+                placeholder="johndoe"
+                className="w-full px-4 py-3 rounded-lg bg-input border border-border text-foreground placeholder:text-muted-foreground transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                required
+              />
+            </div>
+
+            {/* Email Field */}
+            <div className="space-y-2">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-foreground"
+              >
+                Email Address
+              </label>
+              <input
+                type="email"
+                id="email"
+                placeholder="name@university.edu"
+                {...form.register("email")}
+                className="w-full px-4 py-3 rounded-lg bg-input border border-border text-foreground placeholder:text-muted-foreground transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                required
+              />
+            </div>
+
+            {/* Password Field */}
+            <div className="space-y-2">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-foreground"
+              >
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  id="password"
+                  placeholder="••••••••"
+                  type="password"
+                  {...form.register("password")}
+                  className="w-full px-4 py-3 rounded-lg bg-input border border-border text-foreground placeholder:text-muted-foreground transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  required
+                />
+                <button
+                  type="button"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {/* {showPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )} */}
+                </button>
+              </div>
+              {/* {password && (
+                <div className="flex items-center gap-2 mt-2">
+                  <div className="flex-1 bg-muted rounded-full h-1 overflow-hidden">
+                    <div
+                      className={`${strengthColor} h-full transition-all duration-300`}
+                      style={{ width: `${(strength / 4) * 100}%` }}
+                    />
+                  </div>
+                  <span className="text-xs text-muted-foreground">
+                    {strength <= 1
+                      ? "Weak"
+                      : strength === 2
+                        ? "Fair"
+                        : strength === 3
+                          ? "Good"
+                          : "Strong"}
+                  </span>
+                </div>
+              )} */}
+            </div>
+
+            {/* Confirm Password Field */}
+            {/* <div className="space-y-2">
+              <label
+                htmlFor="confirm"
+                className="block text-sm font-medium text-foreground"
+              >
+                Confirm Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showConfirm ? "text" : "password"}
+                  id="confirm"
+                  placeholder="••••••••"
+                  className="w-full px-4 py-3 rounded-lg bg-input border border-border text-foreground placeholder:text-muted-foreground transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm(!showConfirm)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showConfirm ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
+                </button>
+              </div>
+            </div> */}
+
+            {/* Create Account Button */}
+            <button
+              type="submit"
+              disabled={mutation.isPending}
+              className="w-full py-3 rounded-lg bg-primary text-primary-foreground font-semibold transition-all duration-200 hover:shadow-lg hover:shadow-primary/50 disabled:opacity-50 disabled:cursor-not-allowed mt-6"
+            >
+              {mutation.isPending ? "Creating Account..." : "Sign Up"}
+            </button>
+          </form>
+
+          {/* Divider */}
+          <div className="my-6 flex items-center gap-3">
+            <div className="flex-1 h-px bg-border" />
+            <span className="text-xs text-muted-foreground">
+              Already have an account?
+            </span>
+            <div className="flex-1 h-px bg-border" />
+          </div>
+
+          {/* Login Link */}
+          <Link
+            href="/auth/login"
+            className="w-full py-3 rounded-lg border border-border text-foreground font-semibold transition-all duration-200 hover:bg-secondary/50 flex items-center justify-center"
+          >
+            Login
+          </Link>
+        </div>
+
+        {/* Footer */}
+        <p className="text-center text-xs text-muted-foreground">
+          By creating an account, you agree to our{" "}
+          <Link href="#" className="text-primary hover:underline">
+            Terms of Service
+          </Link>{" "}
+          and{" "}
+          <Link href="#" className="text-primary hover:underline">
+            Privacy Policy
+          </Link>
+        </p>
+      </div>
+    </div>
+  );
+}

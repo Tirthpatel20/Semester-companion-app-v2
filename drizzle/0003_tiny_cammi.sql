@@ -1,0 +1,1 @@
+ALTER TABLE "subjects" ALTER COLUMN "credits" SET DATA TYPE real;
