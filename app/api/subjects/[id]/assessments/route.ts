@@ -2,7 +2,10 @@ import { db } from "@/db";
 import { assessments, subjects } from "@/db/schema";
 import { requireSession } from "@/lib/require-session";
 
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, ilike } from "drizzle-orm";
+import { createAssessmentSchema } from "@/lib/validations/create-assessment";
+
+import { ZodError } from "zod";
 
 export async function GET(
   request: Request,
@@ -20,9 +23,7 @@ export async function GET(
       ),
       with: {
         assessments: {
-          orderBy: (assessment, { asc }) => [
-            asc(assessment.createdAt),
-          ],
+          orderBy: (assessment, { asc }) => [asc(assessment.createdAt)],
         },
       },
     });
@@ -63,29 +64,28 @@ export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await params;
   try {
     const session = await requireSession();
 
-    const body = await request.json();
+    let body;
 
-    const { id } = await params;
+    try {
+      body = createAssessmentSchema.parse(await request.json());
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return Response.json(
+          {
+            error: error.flatten(),
+          },
+          {
+            status: 400,
+          },
+        );
+      }
 
-    if (
-      !body.name ||
-      body.maxMarks <= 0 ||
-      body.weightage < 0 ||
-      body.weightage > 100
-    ) {
-      return Response.json(
-        {
-          error: "Invalid fields",
-        },
-        {
-          status: 400,
-        },
-      );
+      throw error;
     }
-
     const subject = await db.query.subjects.findFirst({
       where: and(
         eq(subjects.id, Number(id)),
@@ -103,6 +103,24 @@ export async function POST(
         },
       );
     }
+
+    const existingAssessment = await db.query.assessments.findFirst({
+      where: and(
+        eq(assessments.subjectId, subject.id),
+        ilike(assessments.name, body.name),
+      ),
+    });
+
+    if (existingAssessment) {
+  return Response.json(
+    {
+      error: "Assessment already exists",
+    },
+    {
+      status: 409,
+    },
+  );
+}
 
     const [assessment] = await db
       .insert(assessments)
@@ -125,7 +143,12 @@ export async function POST(
       },
     );
   } catch (error: any) {
-    if (error.code === "23505") {
+    const isDuplicate =
+      error.cause.code === "23505" ||
+      error.message?.includes("unique constraint") ||
+      error.detail?.includes("already exists");
+
+    if (isDuplicate) {
       return Response.json(
         {
           error: "Assessment already exists",
@@ -139,6 +162,7 @@ export async function POST(
     return Response.json(
       {
         error: "Internal server error",
+        object: error,
       },
       {
         status: 500,

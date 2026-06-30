@@ -1,0 +1,1 @@
+ALTER TABLE "assessments" ALTER COLUMN "obtained_marks" SET DATA TYPE real;

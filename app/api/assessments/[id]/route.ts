@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { assessments } from "@/db/schema";
 import { requireSession } from "@/lib/require-session";
-import { eq } from "drizzle-orm";
+import { and, eq, ilike, ne } from "drizzle-orm";
 
 export async function PATCH(
   request: Request,
@@ -43,6 +43,25 @@ export async function PATCH(
       );
     }
 
+    const existingAssessment = await db.query.assessments.findFirst({
+      where: and(
+        eq(assessments.id, Number(id)),
+        ilike(assessments.name, body.name),
+        ne(assessments.id, assessment.id),
+      ),
+    });
+
+    if (existingAssessment) {
+      return Response.json(
+        {
+          error: "Assessment already exists",
+        },
+        {
+          status: 409,
+        },
+      );
+    }
+
     if (body.obtainedMarks > assessment.maxMarks) {
       return Response.json(
         {
@@ -58,6 +77,9 @@ export async function PATCH(
       .update(assessments)
       .set({
         obtainedMarks: body.obtainedMarks,
+        maxMarks: body.maxMarks,
+        weightage: body.weightage,
+        name: body.name,
       })
       .where(eq(assessments.id, assessment.id))
       .returning();
@@ -71,7 +93,17 @@ export async function PATCH(
         status: 200,
       },
     );
-  } catch {
+  } catch (error: any) {
+    if (error.cause.code === "23505") {
+      return Response.json(
+        {
+          error: "Assessment already exists",
+        },
+        {
+          status: 409,
+        },
+      );
+    }
     return Response.json(
       {
         error: "Internal server error",

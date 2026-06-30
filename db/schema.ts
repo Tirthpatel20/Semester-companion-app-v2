@@ -79,7 +79,7 @@ export const assessments = pgTable(
 
     maxMarks: integer("max_marks").notNull(),
 
-    obtainedMarks: integer("obtained_marks"),
+    obtainedMarks: real("obtained_marks"),
 
     weightage: integer("weightage").notNull(),
 

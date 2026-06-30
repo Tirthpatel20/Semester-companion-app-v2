@@ -29,6 +29,13 @@
       "when": 1782458160235,
       "tag": "0003_tiny_cammi",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1782821100487,
+      "tag": "0004_silent_johnny_storm",
+      "breakpoints": true
     }
   ]
 }

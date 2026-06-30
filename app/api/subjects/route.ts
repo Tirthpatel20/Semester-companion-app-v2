@@ -53,7 +53,7 @@ export async function POST(request: Request) {
       );
     }
   } catch (error: any) {
-    if (error.code === "23505")
+    if (error.cause.code === "23505")
       return Response.json(
         {
           error: "Subject already exists",
@@ -92,65 +92,3 @@ export async function GET(request: Request) {
     subjects: userSubjects,
   });
 }
-
-
-// export async function POST(request: Request) {
-//   try {
-//     const session = await requireSession();
-
-//     const body = createSubjectSchema.parse(
-//       await request.json(),
-//     );
-
-//     const [subject] = await db
-//       .insert(subjects)
-//       .values({
-//         name: body.name,
-//         credits: body.credits,
-//         totalClasses: body.totalClasses,
-//         userId: session.user.id,
-//       })
-//       .returning();
-
-//     return Response.json(
-//       {
-//         success: true,
-//         subject,
-//       },
-//       {
-//         status: 201,
-//       },
-//     );
-//   } catch (error: any) {
-//     if (error instanceof ZodError) {
-//       return Response.json(
-//         {
-//           error: error.flatten(),
-//         },
-//         {
-//           status: 400,
-//         },
-//       );
-//     }
-
-//     if (error.code === "23505") {
-//       return Response.json(
-//         {
-//           error: "Subject already exists",
-//         },
-//         {
-//           status: 409,
-//         },
-//       );
-//     }
-
-//     return Response.json(
-//       {
-//         error: "Internal server error",
-//       },
-//       {
-//         status: 500,
-//       },
-//     );
-//   }
-// }

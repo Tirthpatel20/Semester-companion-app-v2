@@ -4,10 +4,10 @@ interface SubjectHeaderProps {
   name: string
   credits: number
   attendance: number
-  status: 'excellent' | 'good' | 'warning' | 'critical'
+  
 }
 
-export function SubjectHeader({ name, credits, attendance, status }: SubjectHeaderProps) {
+export function SubjectHeader({ name, credits, attendance }: SubjectHeaderProps) {
   const statusConfig = {
     excellent: { bg: 'bg-primary/10', text: 'text-primary', label: 'Excellent' },
     good: { bg: 'bg-accent/10', text: 'text-accent', label: 'Good' },
@@ -15,7 +15,7 @@ export function SubjectHeader({ name, credits, attendance, status }: SubjectHead
     critical: { bg: 'bg-destructive/10', text: 'text-destructive', label: 'Critical' },
   }
 
-  const config = statusConfig[status]
+  
 
   return (
     <div className="glass-card rounded-3xl p-8 border border-primary/20 mb-8">
@@ -38,9 +38,6 @@ export function SubjectHeader({ name, credits, attendance, status }: SubjectHead
           </div>
         </div>
 
-        <div className={`${config.bg} ${config.text} rounded-2xl px-6 py-3 border border-current/30 font-semibold text-lg`}>
-          {config.label}
-        </div>
       </div>
     </div>
   )

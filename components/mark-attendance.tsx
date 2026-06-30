@@ -50,7 +50,9 @@ export function MarkAttendance({
         <button
           disabled={isPending}
           onClick={() => onMarkAttendance("Present")}
-          className="flex items-center justify-center gap-2 rounded-xl bg-primary text-primary-foreground py-4 font-semibold transition-all hover:scale-[1.02] disabled:opacity-50"
+          className="flex items-center justify-center gap-2 rounded-xl bg-primary text-primary-foreground py-4 font-semibold transition-all hover:scale-[1.02] disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+          title="Mark present"
+          aria-label="Mark present for today"
         >
           <CheckCircle2 className="w-5 h-5" />
           Present
@@ -59,7 +61,9 @@ export function MarkAttendance({
         <button
           disabled={isPending}
           onClick={() => onMarkAttendance("Absent")}
-          className="flex items-center justify-center gap-2 rounded-xl bg-destructive text-white py-4 font-semibold transition-all hover:scale-[1.02] disabled:opacity-50"
+          className="flex items-center justify-center gap-2 rounded-xl bg-destructive text-white py-4 font-semibold transition-all hover:scale-[1.02] disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-destructive focus-visible:outline-none"
+          title="Mark absent"
+          aria-label="Mark absent for today"
         >
           <XCircle className="w-5 h-5" />
           Absent

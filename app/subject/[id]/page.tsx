@@ -4,15 +4,22 @@ import { Navigation } from "@/components/navigation";
 import { SubjectHeader } from "@/components/subject-header";
 import { AttendanceSection } from "@/components/attendance-section";
 import { MarksSection } from "@/components/marks-section";
-import { GradePlanner } from "@/components/grade-planner";
-import { MarksEntryForm } from "@/components/marks-entry-form";
+import { AssessmentForm } from "@/components/assessment-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getSubject } from "@/services/subjects";
-import { useParams } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Pencil, Plus } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
 import { getAttendance, markAttendance } from "@/services/attendance";
 import { AttendanceStatus } from "@/types";
 import { toast } from "sonner";
 import { MarkAttendance } from "@/components/mark-attendance";
+import { useEffect, useState } from "react";
+import { EditSubjectForm } from "@/components/edit-subject-form";
+import { getAssessments } from "@/services/assessments";
+import { deleteAssessment } from "@/services/assessments";
+import { authClient } from "@/auth-client";
+
 
 interface Record {
   attendanceDate: string;
@@ -22,10 +29,40 @@ interface Record {
   subjectId: number;
 }
 
+interface Assessment {
+  id: number;
+  name: string;
+  maxMarks: number;
+  obtainedMarks: number | null;
+  weightage: number;
+  subjectId: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export default function SubjectAnalytics() {
   const params = useParams();
 
   const id = Number(params.id);
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingAssessment, setEditingAssessment] = useState<Assessment | null>(
+    null,
+  );
+
+  const [isAssessmentFormOpen, setIsAssessmentFormOpen] = useState(false);
+  const [assessmentToDelete, setAssessmentToDelete] = useState<Assessment | null>(null);
+
+
+    const { data, isPending } = authClient.useSession();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (!isPending && !data) {
+          router.replace("/auth/login");
+        }
+      }, [data, isPending, router]);
+
 
   const queryClient = useQueryClient();
 
@@ -36,8 +73,8 @@ export default function SubjectAnalytics() {
 
   const markAttendanceMutation = useMutation({
     mutationFn: (status: AttendanceStatus) => markAttendance(id, status),
-    onSuccess: () => {
-      toast.success("Attendance updated");
+    onSuccess: (_, status) => {
+      toast.success(`Attendance marked as ${status}.`);
 
       queryClient.invalidateQueries({
         queryKey: ["attendance", id],
@@ -49,62 +86,122 @@ export default function SubjectAnalytics() {
     },
   });
 
-  if (getSubjectQuery.isError) {
-    return <div>{getSubjectQuery.error.message}</div>;
-  }
+  const deleteAssessmentMutation = useMutation({
+    mutationFn: deleteAssessment,
+
+    onSuccess: () => {
+      toast.success("Assessment deleted");
+
+      queryClient.invalidateQueries({
+        queryKey: ["assessments", id],
+      });
+    },
+
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
 
   const getAttendanceQuery = useQuery({
     queryKey: ["attendance", id],
     queryFn: () => getAttendance(id),
   });
 
-  if (getSubjectQuery.isPending || getAttendanceQuery.isPending) {
-    return <div>Loading...</div>;
+  const assessmentsQuery = useQuery({
+    queryKey: ["assessments", id],
+    queryFn: () => getAssessments(id),
+  });
+
+  if (
+    getSubjectQuery.isPending ||
+    getAttendanceQuery.isPending ||
+    assessmentsQuery.isPending
+  ) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <main className="max-w-7xl mx-auto px-6 py-12">
+          <div className="flex justify-end gap-3 mb-6">
+            <div className="h-10 w-32 bg-muted rounded-xl animate-pulse" />
+            <div className="h-10 w-36 bg-muted rounded-xl animate-pulse" />
+          </div>
+          <SubjectHeaderSkeleton />
+          <div className="mb-8">
+            <AttendanceSectionSkeleton />
+          </div>
+          <MarksSectionSkeleton />
+        </main>
+      </div>
+    );
   }
 
+  if (getSubjectQuery.isError) {
+    return <div>{getSubjectQuery.error.message}</div>;
+  }
+  if (assessmentsQuery.isError) {
+    return <div>{assessmentsQuery.error.message}</div>;
+  }
   if (getAttendanceQuery.isError) {
     return <div>{getAttendanceQuery.error.message}</div>;
   }
 
-  const subject = getSubjectQuery.data.subject;
-  const status: "excellent" | "good" | "poor" | "excellent" = "excellent";
-
   const { records, stats } = getAttendanceQuery.data;
-
-  const trend = "up";
-
-  const assessments = [
-    { name: "Quiz 1", obtained: 18, maximum: 20 },
-    { name: "Quiz 2", obtained: 19, maximum: 20 },
-    { name: "Midsem", obtained: 38, maximum: 40 },
-    { name: "Assignment", obtained: 9, maximum: 10 },
-    { name: "Endsem", obtained: 0, maximum: 50 },
-  ];
-
-  const calculateTotalObtained = () =>
-    assessments.reduce((sum, a) => sum + a.obtained, 0);
-  const calculateTotalMarks = () =>
-    assessments.reduce((sum, a) => sum + a.maximum, 0);
-
-  const obtainedMarks = calculateTotalObtained();
-  const totalMarks = calculateTotalMarks();
-  const remainingMarks = assessments
-    .filter((a) => a.obtained === 0)
-    .reduce((sum, a) => sum + a.maximum, 0);
+  const subject = getSubjectQuery.data.subject;
+  const assessments = assessmentsQuery.data.assessments;
 
   const today = new Date().toISOString().split("T")[0];
+  
+ console.log(stats)
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
 
       <main className="max-w-7xl mx-auto px-6 py-12">
-        {/* Subject Header */}
+        <div className="flex justify-end gap-3 mb-6">
+          <Button
+            variant="outline"
+            onClick={() => setIsEditing((prev) => !prev)}
+            title="Edit Subject"
+            aria-label="Edit Subject"
+            className="rounded-xl px-4 py-2.5 flex items-center gap-2 hover:bg-secondary/80 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+          >
+            <Pencil className="w-4 h-4" />
+            Edit Subject
+          </Button>
+          <Button
+            variant="default"
+            onClick={() => {
+              setEditingAssessment(null);
+              setIsAssessmentFormOpen(true);
+            }}
+            title="Add Assessment"
+            aria-label="Add Assessment"
+            className="rounded-xl px-4 py-2.5 flex items-center gap-2 transition-all hover:scale-105 active:scale-95 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+          >
+            <Plus className="w-4 h-4" />
+            Add Assessment
+          </Button>
+        </div>
+
+        
+        
         <SubjectHeader
           name={subject.name}
           credits={subject.credits}
-          attendance={ subject.attendance || 0 }
-          status={status}
+          attendance={stats.attendancePercentage || 0}
         />
+
+        {isEditing && (
+          <EditSubjectForm
+            subjectId={subject.id}
+            defaultValues={{
+              name: subject.name,
+              credits: subject.credits,
+              totalClasses: subject.totalClasses,
+            }}
+            onClose={() => setIsEditing(false)}
+          />
+        )}
 
         <MarkAttendance
           currentStatus={
@@ -125,33 +222,149 @@ export default function SubjectAnalytics() {
             canSkip={stats.classesCanSkip ?? 0}
             needFor75={stats.classesNeeded ?? 0}
             trend="stable"
+            hasRecords={records.length > 0}
           />
         </div>
-
-        {/* Marks Entry Form */}
-        <div className="mb-8">
-          <MarksEntryForm />
-        </div>
+        {isAssessmentFormOpen && (
+          <AssessmentForm
+            key={editingAssessment?.id ?? "new"}
+            subjectId={id}
+            assessment={editingAssessment ?? undefined}
+            onClose={() => {
+              setIsAssessmentFormOpen(false);
+              setEditingAssessment(null);
+            }}
+          />
+        )}
 
         {/* Marks Section */}
-        <div className="mb-8">
-          <MarksSection assessments={assessments} />
-        </div>
+        <MarksSection
+          assessments={assessments}
+          onEdit={(assessment) => {
+            setEditingAssessment(assessment);
+            setIsAssessmentFormOpen(true);
+          }}
+          onDelete={(assessmentId) => {
+            const assessment = assessments.find((a: any) => a.id === assessmentId);
+            if (assessment) {
+              setAssessmentToDelete(assessment);
+            }
+          }}
+          onAddAssessment={() => {
+            setEditingAssessment(null);
+            setIsAssessmentFormOpen(true);
+          }}
+        />
 
-        {/* Grade Planner */}
-        <div className="mb-16">
-          <GradePlanner
-            obtainedMarks={obtainedMarks}
-            totalMarks={totalMarks}
-            remainingMarks={remainingMarks}
-          />
-        </div>
+        {assessmentToDelete && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/40 backdrop-blur-md"
+            onClick={() => setAssessmentToDelete(null)}
+          >
+            <div
+              className="glass-card rounded-2xl p-8 border border-primary/20 w-full max-w-md shadow-2xl relative"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="text-xl font-bold text-foreground mb-3">Delete Assessment</h3>
+              <p className="text-muted-foreground text-sm mb-6">
+                Are you sure you want to delete the assessment <strong className="text-foreground">"{assessmentToDelete.name}"</strong>? This action cannot be undone.
+              </p>
+              <div className="flex gap-4">
+                <Button
+                  variant="secondary"
+                  onClick={() => setAssessmentToDelete(null)}
+                  className="flex-1 rounded-xl py-3 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => {
+                    deleteAssessmentMutation.mutate(assessmentToDelete.id);
+                    setAssessmentToDelete(null);
+                  }}
+                  className="flex-1 bg-destructive text-white hover:bg-destructive/80 rounded-xl py-3 focus-visible:ring-2 focus-visible:ring-destructive focus-visible:outline-none"
+                >
+                  Delete
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Footer */}
         <div className="border-t border-border/50 pt-8 pb-8 text-center text-muted-foreground text-sm">
           <p>Subject Analytics • {subject.name} • Semester Companion</p>
         </div>
       </main>
+    </div>
+  );
+}
+
+function SubjectHeaderSkeleton() {
+  return (
+    <div className="glass-card rounded-3xl p-8 border border-border/50 mb-8 animate-pulse">
+      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+        <div className="flex-1">
+          <div className="h-10 bg-muted rounded w-1/3 mb-4" />
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className="h-6 bg-muted rounded w-24" />
+            <div className="h-6 bg-muted rounded w-32" />
+          </div>
+        </div>
+        <div className="h-12 bg-muted rounded-2xl w-32" />
+      </div>
+    </div>
+  );
+}
+
+function AttendanceSectionSkeleton() {
+  return (
+    <div className="glass-card rounded-3xl p-8 border border-border/50 mb-8 animate-pulse">
+      <div className="h-8 bg-muted rounded w-48 mb-8" />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div className="flex flex-col items-center justify-center">
+          <div className="w-48 h-48 rounded-full border-4 border-muted flex items-center justify-center" />
+          <div className="h-4 bg-muted rounded w-24 mt-6" />
+        </div>
+        <div className="space-y-6">
+          <div className="grid grid-cols-3 gap-4">
+            <div className="h-20 bg-muted rounded-2xl" />
+            <div className="h-20 bg-muted rounded-2xl" />
+            <div className="h-20 bg-muted rounded-2xl" />
+          </div>
+          <div className="space-y-4 pt-4 border-t border-border/50">
+            <div className="h-8 bg-muted rounded-xl" />
+            <div className="h-8 bg-muted rounded-xl" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MarksSectionSkeleton() {
+  return (
+    <div className="glass-card rounded-3xl p-8 border border-border/50 animate-pulse">
+      <div className="h-8 bg-muted rounded w-48 mb-8" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="bg-muted/10 border border-muted rounded-2xl p-6 h-56 flex flex-col justify-between">
+            <div>
+              <div className="h-5 bg-muted rounded w-3/4 mb-2" />
+              <div className="h-3 bg-muted rounded w-1/2" />
+            </div>
+            <div className="space-y-2">
+              <div className="h-8 bg-muted rounded w-1/3" />
+              <div className="h-2 bg-muted rounded w-full" />
+            </div>
+            <div className="flex gap-2">
+              <div className="h-8 bg-muted rounded-lg flex-1" />
+              <div className="h-8 bg-muted rounded-lg flex-1" />
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

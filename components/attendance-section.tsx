@@ -10,6 +10,7 @@ interface AttendanceSectionProps {
   canSkip: number
   needFor75: number
   trend: 'up' | 'down' | 'stable'
+  hasRecords?: boolean
 }
 
 export function AttendanceSection({
@@ -20,6 +21,7 @@ export function AttendanceSection({
   canSkip,
   needFor75,
   trend,
+  hasRecords = true,
 }: AttendanceSectionProps) {
   const circumference = 2 * Math.PI * 55
   const strokeDashoffset = circumference - (attendance / 100) * circumference
@@ -28,7 +30,14 @@ export function AttendanceSection({
     <div className="glass-card rounded-3xl p-8 border border-primary/20">
       <h2 className="text-2xl font-bold text-foreground mb-8">Attendance Analytics</h2>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+      {!hasRecords ? (
+        <div className="flex flex-col items-center justify-center py-10 text-center">
+          <p className="text-muted-foreground font-medium">
+            No attendance has been marked yet.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         {/* Circular Progress Ring */}
         <div className="flex flex-col items-center justify-center">
           <div className="relative w-48 h-48">
@@ -122,6 +131,7 @@ export function AttendanceSection({
           </div>
         </div>
       </div>
+      )}
     </div>
   )
 }

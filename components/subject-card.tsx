@@ -1,6 +1,6 @@
 'use client'
 
-import { TrendingUp, TrendingDown } from 'lucide-react'
+import { TrendingUp, TrendingDown, Trash2, Pencil } from 'lucide-react'
 
 interface SubjectCardProps {
   name: string
@@ -9,6 +9,8 @@ interface SubjectCardProps {
   canSkip: number
   needFor75: number
   trend: 'up' | 'down' | 'stable'
+  onEdit?: () => void
+  onDelete?: () => void
 }
 
 export function SubjectCard({
@@ -18,6 +20,8 @@ export function SubjectCard({
   canSkip,
   needFor75,
   trend,
+  onEdit,
+  onDelete,
 }: SubjectCardProps) {
   const circumference = 2 * Math.PI * 45
   const strokeDashoffset = circumference - (attendance / 100) * circumference
@@ -32,14 +36,46 @@ export function SubjectCard({
     )
 
   return (
-    <div className="glass-card rounded-2xl p-6 border border-primary/20 hover:border-primary/40 smooth-hover flex flex-col h-full">
+    <div className="relative group glass-card rounded-2xl p-6 border border-primary/20 hover:border-primary/40 smooth-hover flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-start justify-between mb-6">
-        <div className="flex-1">
+      <div className="flex items-start justify-between mb-6 relative">
+        <div className="flex-1 pr-12">
           <h3 className="text-lg font-semibold text-foreground">{name}</h3>
           <p className="text-xs text-muted-foreground mt-1">{credits} Credits</p>
         </div>
-        <div className="text-muted-foreground">{trendIcon}</div>
+        <div className="flex items-center min-h-[24px]">
+          <div className="text-muted-foreground group-hover:opacity-0 group-focus-within:opacity-0 transition-opacity duration-200">
+            {trendIcon}
+          </div>
+          {onEdit && onDelete && (
+            <div className="absolute top-0 right-0 flex gap-1 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-200 z-10">
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onEdit();
+                }}
+                className="p-1 rounded-lg bg-background/50 hover:bg-background border border-border text-muted-foreground hover:text-foreground transition-all duration-200 shadow-sm flex items-center justify-center focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+                title={`Edit ${name}`}
+                aria-label={`Edit ${name}`}
+              >
+                <Pencil className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onDelete();
+                }}
+                className="p-1 rounded-lg bg-background/50 hover:bg-destructive/15 border border-border text-muted-foreground hover:text-destructive transition-all duration-200 shadow-sm flex items-center justify-center focus-visible:ring-2 focus-visible:ring-destructive focus-visible:outline-none"
+                title={`Delete ${name}`}
+                aria-label={`Delete ${name}`}
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Circular Progress */}
