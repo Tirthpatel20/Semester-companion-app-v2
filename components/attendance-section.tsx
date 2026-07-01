@@ -9,7 +9,6 @@ interface AttendanceSectionProps {
   totalClasses: number
   canSkip: number
   needFor75: number
-  trend: 'up' | 'down' | 'stable'
   hasRecords?: boolean
 }
 
@@ -20,7 +19,6 @@ export function AttendanceSection({
   totalClasses,
   canSkip,
   needFor75,
-  trend,
   hasRecords = true,
 }: AttendanceSectionProps) {
   const circumference = 2 * Math.PI * 55
@@ -71,28 +69,6 @@ export function AttendanceSection({
               <span className="text-4xl font-bold text-foreground">{attendance}%</span>
               <span className="text-sm text-muted-foreground mt-2">Current</span>
             </div>
-          </div>
-
-          {/* Trend */}
-          <div className="mt-6 flex items-center gap-2">
-            {trend === 'up' && (
-              <>
-                <TrendingUp className="w-5 h-5 text-primary" />
-                <span className="text-sm font-medium text-primary">Improving</span>
-              </>
-            )}
-            {trend === 'down' && (
-              <>
-                <TrendingDown className="w-5 h-5 text-destructive" />
-                <span className="text-sm font-medium text-destructive">Declining</span>
-              </>
-            )}
-            {trend === 'stable' && (
-              <>
-                <div className="w-5 h-5 bg-primary/50 rounded" />
-                <span className="text-sm font-medium text-muted-foreground">Stable</span>
-              </>
-            )}
           </div>
         </div>
 

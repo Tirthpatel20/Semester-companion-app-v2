@@ -15,9 +15,9 @@ export const auth = betterAuth({
 
     sendResetPassword: async ({ user, url }) => {
       await resend.emails.send({
-        from: "Semester Companion <onboarding@resend.dev>",
+        from: "Semester Sync <onboarding@resend.dev>",
         to: user.email,
-        subject: "Reset your Semester Companion password",
+        subject: "Reset your Semester Sync password",
         html: `
         <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto">
           <h2>Reset your password</h2>

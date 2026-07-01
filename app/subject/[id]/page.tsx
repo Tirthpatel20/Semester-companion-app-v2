@@ -218,7 +218,7 @@ export default function SubjectAnalytics() {
             totalClasses={subject.totalClasses}
             canSkip={stats.classesCanSkip ?? 0}
             needFor75={stats.classesNeeded ?? 0}
-            trend="stable"
+            
             hasRecords={records.length > 0}
           />
         </div>
