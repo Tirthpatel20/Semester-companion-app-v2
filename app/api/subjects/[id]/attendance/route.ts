@@ -140,7 +140,8 @@ export async function POST(
         status: 201,
       },
     );
-  } catch {
+  } catch(error) {
+    console.log(error)
     return Response.json(
       {
         error: "Internal server error",

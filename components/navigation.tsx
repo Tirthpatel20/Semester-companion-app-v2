@@ -1,17 +1,17 @@
-'use client'
+"use client";
 
-import { LogOut } from 'lucide-react'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { useMutation } from '@tanstack/react-query'
-import { authClient } from '@/auth-client'
-import { signOut } from '@/services/auth'
-import { toast } from 'sonner'
+import { LogOut } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
+import { authClient } from "@/auth-client";
+import { signOut } from "@/services/auth";
+import { toast } from "sonner";
 
 export function Navigation() {
-  const router = useRouter()
-  const { data } = authClient.useSession()
-  const userName = data?.user?.name || "Student"
+  const router = useRouter();
+  const { data } = authClient.useSession();
+  const userName = data?.user?.name || "Student";
 
   const signOutMutation = useMutation({
     mutationFn: signOut,
@@ -33,16 +33,21 @@ export function Navigation() {
           className="flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded-lg p-1 transition-transform hover:scale-102"
         >
           <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-            <span className="text-primary-foreground font-bold text-lg">S</span>
+            <span className="text-primary-foreground font-bold text-lg">
+              SS
+            </span>
           </div>
-          <span className="text-lg font-semibold text-foreground hidden sm:inline">Semester</span>
+          <span className="text-lg font-semibold text-foreground hidden sm:inline">
+            Semester Sync
+          </span>
         </Link>
 
         {/* User Menu */}
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-full" />
-            <span className="text-sm font-medium text-foreground hidden sm:inline">{userName}</span>
+            <span className="text-sm font-medium text-foreground hidden sm:inline">
+              {userName}
+            </span>
           </div>
           <button
             onClick={() => signOutMutation.mutate()}
@@ -57,5 +62,5 @@ export function Navigation() {
         </div>
       </div>
     </nav>
-  )
+  );
 }

@@ -20,7 +20,6 @@ import { getAssessments } from "@/services/assessments";
 import { deleteAssessment } from "@/services/assessments";
 import { authClient } from "@/auth-client";
 
-
 interface Record {
   attendanceDate: string;
   createdAt: string;
@@ -40,6 +39,8 @@ interface Assessment {
   updatedAt: string;
 }
 
+//
+
 export default function SubjectAnalytics() {
   const params = useParams();
 
@@ -51,18 +52,17 @@ export default function SubjectAnalytics() {
   );
 
   const [isAssessmentFormOpen, setIsAssessmentFormOpen] = useState(false);
-  const [assessmentToDelete, setAssessmentToDelete] = useState<Assessment | null>(null);
+  const [assessmentToDelete, setAssessmentToDelete] =
+    useState<Assessment | null>(null);
 
+  const { data, isPending } = authClient.useSession();
+  const router = useRouter();
 
-    const { data, isPending } = authClient.useSession();
-    const router = useRouter();
-
-    useEffect(() => {
-        if (!isPending && !data) {
-          router.replace("/auth/login");
-        }
-      }, [data, isPending, router]);
-
+  useEffect(() => {
+    if (!isPending && !data) {
+      router.replace("/auth/login");
+    }
+  }, [data, isPending, router]);
 
   const queryClient = useQueryClient();
 
@@ -150,8 +150,7 @@ export default function SubjectAnalytics() {
   const assessments = assessmentsQuery.data.assessments;
 
   const today = new Date().toISOString().split("T")[0];
-  
- console.log(stats)
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -183,8 +182,6 @@ export default function SubjectAnalytics() {
           </Button>
         </div>
 
-        
-        
         <SubjectHeader
           name={subject.name}
           credits={subject.credits}
@@ -245,7 +242,9 @@ export default function SubjectAnalytics() {
             setIsAssessmentFormOpen(true);
           }}
           onDelete={(assessmentId) => {
-            const assessment = assessments.find((a: any) => a.id === assessmentId);
+            const assessment = assessments.find(
+              (a: any) => a.id === assessmentId,
+            );
             if (assessment) {
               setAssessmentToDelete(assessment);
             }
@@ -265,9 +264,15 @@ export default function SubjectAnalytics() {
               className="glass-card rounded-2xl p-8 border border-primary/20 w-full max-w-md shadow-2xl relative"
               onClick={(e) => e.stopPropagation()}
             >
-              <h3 className="text-xl font-bold text-foreground mb-3">Delete Assessment</h3>
+              <h3 className="text-xl font-bold text-foreground mb-3">
+                Delete Assessment
+              </h3>
               <p className="text-muted-foreground text-sm mb-6">
-                Are you sure you want to delete the assessment <strong className="text-foreground">"{assessmentToDelete.name}"</strong>? This action cannot be undone.
+                Are you sure you want to delete the assessment{" "}
+                <strong className="text-foreground">
+                  "{assessmentToDelete.name}"
+                </strong>
+                ? This action cannot be undone.
               </p>
               <div className="flex gap-4">
                 <Button
@@ -349,7 +354,10 @@ function MarksSectionSkeleton() {
       <div className="h-8 bg-muted rounded w-48 mb-8" />
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="bg-muted/10 border border-muted rounded-2xl p-6 h-56 flex flex-col justify-between">
+          <div
+            key={i}
+            className="bg-muted/10 border border-muted rounded-2xl p-6 h-56 flex flex-col justify-between"
+          >
             <div>
               <div className="h-5 bg-muted rounded w-3/4 mb-2" />
               <div className="h-3 bg-muted rounded w-1/2" />

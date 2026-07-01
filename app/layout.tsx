@@ -12,26 +12,51 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Semester Companion - Academic Dashboard",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
+  title: {
+    template: "%s | SemesterSync",
+    default: "SemesterSync",
+  },
   description:
-    "Premium dark-mode student dashboard for tracking academic performance",
-  generator: "v0.app",
-  icons: {
-    icon: [
+    "Track attendance, Track CGPA, manage subjects, and stay organized with SemesterSync—the modern academic dashboard for college students.",
+  keywords: [
+    "attendance tracker",
+    "semester planner",
+    "student dashboard",
+    "college attendance",
+    "academic management",
+  ],
+  twitter: {
+    card: "summary_large_image",
+    title: "SemesterSync",
+    description: "Track attendance and predict CGPA.",
+    images: ["/opengraph-image.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  applicationName: "SemesterSync",
+  creator: "Tirth Patel",
+  authors: [
+    {
+      name: "Tirth Patel",
+    },
+  ],category: "Education",
+  openGraph: {
+    title: "SemesterSync",
+    description: "Track attendance, predict CGPA and manage your semester.",
+    url: "https://semestersync.vercel.app",
+    siteName: "SemesterSync",
+    images: [
       {
-        url: "/icon-light-32x32.png",
-        media: "(prefers-color-scheme: light)",
-      },
-      {
-        url: "/icon-dark-32x32.png",
-        media: "(prefers-color-scheme: dark)",
-      },
-      {
-        url: "/icon.svg",
-        type: "image/svg+xml",
+        url: "/opengraph-image.png",
+        width: 1200,
+        height: 630,
       },
     ],
-    apple: "/apple-icon.png",
+    locale: "en_US",
+    type: "website",
   },
 };
 

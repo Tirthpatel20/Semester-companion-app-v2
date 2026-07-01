@@ -48,3 +48,32 @@ export async function signInWithGoogle() {
     callbackURL: "/",
   });
 }
+
+export async function forgotPassword(email: string) {
+  const result = await authClient.requestPasswordReset({
+    email,
+    redirectTo: "http://localhost:3000/auth/reset-password",
+  });
+
+  if (result.error) {
+    throw new Error(result.error.message);
+  }
+
+  return result.data;
+}
+
+export async function resetPassword(
+  token: string,
+  newPassword: string,
+) {
+  const result = await authClient.resetPassword({
+    token,
+    newPassword,
+  });
+
+  if (result.error) {
+    throw new Error(result.error.message);
+  }
+
+  return result.data;
+}

@@ -57,7 +57,11 @@
 import { z } from "zod";
 
 export const createSubjectSchema = z.object({
-  name: z.string().trim().min(2, "Subject name must be at least 2 characters."),
+  name: z
+    .string({ required_error: "Subject name is required." })
+    .trim()
+    .min(1, "Subject name is required.")
+    .min(2, "Subject name must be at least 2 characters."),
 
   credits: z
     .preprocess(
@@ -70,7 +74,7 @@ export const createSubjectSchema = z.object({
         .optional(),
     )
     .refine((value) => value !== undefined, {
-      message: "Credits are required.",
+      message: "Credits is required.",
     }),
 
   totalClasses: z
@@ -84,7 +88,7 @@ export const createSubjectSchema = z.object({
         .optional(),
     )
     .refine((value) => value !== undefined, {
-      message: "Total classes are required.",
+      message: "Total classes is required.",
     }),
 });
 

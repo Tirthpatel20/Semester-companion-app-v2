@@ -109,7 +109,7 @@ export function AddSubjectForm({
           </button>
         </div>
 
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6" noValidate>
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">
               Subject Name
