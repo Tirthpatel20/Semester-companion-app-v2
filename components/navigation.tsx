@@ -26,7 +26,7 @@ export function Navigation() {
 
   return (
     <nav className="glass-nav sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 py-3 md:px-6 md:py-4 flex items-center justify-between">
         {/* Logo */}
         <Link
           href="/"
@@ -43,7 +43,7 @@ export function Navigation() {
         </Link>
 
         {/* User Menu */}
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-3 md:gap-6">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-foreground hidden sm:inline">
               {userName}
@@ -52,7 +52,7 @@ export function Navigation() {
           <button
             onClick={() => signOutMutation.mutate()}
             disabled={signOutMutation.isPending}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border bg-secondary/30 text-destructive hover:bg-destructive/10 hover:border-destructive/30 transition-all text-xs font-semibold focus-visible:ring-2 focus-visible:ring-destructive focus-visible:outline-none disabled:opacity-50 disabled:pointer-events-none"
+            className="flex items-center gap-2 px-2.5 py-1.5 md:px-3 md:py-1.5 rounded-lg border border-border bg-secondary/30 text-destructive hover:bg-destructive/10 hover:border-destructive/30 transition-all text-xs font-semibold focus-visible:ring-2 focus-visible:ring-destructive focus-visible:outline-none disabled:opacity-50 disabled:pointer-events-none"
             title="Sign Out"
             aria-label="Sign Out"
           >

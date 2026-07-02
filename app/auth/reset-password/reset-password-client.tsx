@@ -55,7 +55,7 @@ export default function ResetPasswordClient() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-6 md:py-12">
       {/* Decorative blur elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/5 rounded-full blur-3xl" />
@@ -66,30 +66,30 @@ export default function ResetPasswordClient() {
         {/* Back Button */}
         <button
           onClick={() => router.push("/auth/login")}
-          className="inline-flex items-center gap-2 text-primary hover:text-primary/80 transition-colors mb-6 font-medium"
+          className="inline-flex items-center gap-1.5 md:gap-2 text-primary hover:text-primary/80 transition-colors mb-4 md:mb-6 text-xs md:text-sm font-medium"
         >
           ← Back to Login
         </button>
 
         {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-linear-to-br from-primary to-accent/80 mb-4">
-            <span className="text-white font-bold text-lg">SS</span>
+        <div className="text-center mb-6 md:mb-8">
+          <div className="inline-flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-xl bg-linear-to-br from-primary to-accent/80 mb-3 md:mb-4">
+            <span className="text-white font-bold text-base md:text-lg">SS</span>
           </div>
 
-          <h1 className="text-2xl font-bold text-foreground">Reset Password</h1>
+          <h1 className="text-xl md:text-2xl font-bold text-foreground">Reset Password</h1>
 
-          <p className="text-sm text-muted-foreground mt-2">
+          <p className="text-xs md:text-sm text-muted-foreground mt-1.5 md:mt-2">
             Enter your new password below.
           </p>
         </div>
 
         {/* Card */}
-        <div className="glass-card rounded-2xl p-8">
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5" noValidate>
+        <div className="glass-card rounded-2xl p-5 md:p-8">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 md:space-y-5" noValidate>
             {/* Password */}
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-foreground">
+            <div className="space-y-1.5 md:space-y-2">
+              <label className="block text-xs md:text-sm font-medium text-foreground">
                 New Password
               </label>
 
@@ -98,7 +98,7 @@ export default function ResetPasswordClient() {
                   type={showPassword ? "text" : "password"}
                   {...form.register("password")}
                   placeholder="Enter your new password"
-                  className="w-full px-4 py-3 pr-12 rounded-lg bg-input border border-border text-foreground placeholder:text-muted-foreground transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-3.5 py-2.5 pr-10 md:px-4 md:py-3 md:pr-12 rounded-lg bg-input border border-border text-foreground placeholder:text-muted-foreground transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                 />
 
                 <button
@@ -107,21 +107,21 @@ export default function ResetPasswordClient() {
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 >
                   {showPassword ? (
-                    <EyeOff className="w-5 h-5" />
+                    <EyeOff className="w-4 h-4 md:w-5 md:h-5" />
                   ) : (
-                    <Eye className="w-5 h-5" />
+                    <Eye className="w-4 h-4 md:w-5 md:h-5" />
                   )}
                 </button>
               </div>
 
-              <p className="text-red-500 text-sm">
+              <p className="text-red-500 text-xs md:text-sm">
                 {form.formState.errors.password?.message}
               </p>
             </div>
 
             {/* Confirm Password */}
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-foreground">
+            <div className="space-y-1.5 md:space-y-2">
+              <label className="block text-xs md:text-sm font-medium text-foreground">
                 Confirm Password
               </label>
 
@@ -130,7 +130,7 @@ export default function ResetPasswordClient() {
                   type={showConfirmPassword ? "text" : "password"}
                   {...form.register("confirmPassword")}
                   placeholder="Confirm your password"
-                  className="w-full px-4 py-3 pr-12 rounded-lg bg-input border border-border text-foreground placeholder:text-muted-foreground transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-3.5 py-2.5 pr-10 md:px-4 md:py-3 md:pr-12 rounded-lg bg-input border border-border text-foreground placeholder:text-muted-foreground transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                 />
 
                 <button
@@ -139,14 +139,14 @@ export default function ResetPasswordClient() {
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 >
                   {showConfirmPassword ? (
-                    <EyeOff className="w-5 h-5" />
+                    <EyeOff className="w-4 h-4 md:w-5 md:h-5" />
                   ) : (
-                    <Eye className="w-5 h-5" />
+                    <Eye className="w-4 h-4 md:w-5 md:h-5" />
                   )}
                 </button>
-              </div> 
+              </div>
 
-              <p className="text-red-500 text-sm">
+              <p className="text-red-500 text-xs md:text-sm">
                 {form.formState.errors.confirmPassword?.message}
               </p>
             </div>
@@ -155,7 +155,7 @@ export default function ResetPasswordClient() {
             <button
               type="submit"
               disabled={resetPasswordMutation.isPending}
-              className="w-full py-3 rounded-lg bg-primary text-primary-foreground font-semibold transition-all duration-200 hover:shadow-lg hover:shadow-primary/50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-2.5 md:py-3 rounded-lg bg-primary text-primary-foreground font-semibold text-sm md:text-base transition-all duration-200 hover:shadow-lg hover:shadow-primary/50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {resetPasswordMutation.isPending
                 ? "Resetting Password..."

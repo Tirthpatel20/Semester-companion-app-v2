@@ -44,11 +44,11 @@ export function SubjectCard({
           <p className="text-xs text-muted-foreground mt-1">{credits} Credits</p>
         </div>
         <div className="flex items-center min-h-[24px]">
-          <div className="text-muted-foreground group-hover:opacity-0 group-focus-within:opacity-0 transition-opacity duration-200">
+          <div className="text-muted-foreground md:group-hover:opacity-0 md:group-focus-within:opacity-0 transition-opacity duration-200">
             {trendIcon}
           </div>
           {onEdit && onDelete && (
-            <div className="absolute top-0 right-0 flex gap-1 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-200 z-10">
+            <div className="absolute top-0 right-0 flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100 transition-opacity duration-200 z-10">
               <button
                 onClick={(e) => {
                   e.preventDefault();

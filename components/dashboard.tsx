@@ -180,8 +180,8 @@ export default function Dashboard() {
     <div className="min-h-screen bg-background">
       <Navigation />
 
-      <main className="max-w-7xl mx-auto px-6 py-12">
-        <section className="mb-12">
+      <main className="max-w-7xl mx-auto px-4 py-6 md:px-6 md:py-12">
+        <section className="mb-8 md:mb-12">
           {editingSubject ? (
             <EditSubjectForm
               subjectId={editingSubject.id}
@@ -200,20 +200,20 @@ export default function Dashboard() {
           )}
         </section>
 
-        <section className="mt-12">
-          <h2 className="text-xl font-semibold text-foreground mb-6">
+        <section className="mt-8 md:mt-12">
+          <h2 className="text-lg md:text-xl font-semibold text-foreground mb-4 md:mb-6">
             Performance Overview
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             {statsData.map((stat, idx) => (
               <StatCard key={idx} {...stat} />
             ))}
           </div>
         </section>
 
-        <section className="mt-14">
-          <h2 className="text-xl font-semibold text-foreground mb-6">
+        <section className="mt-10 md:mt-14">
+          <h2 className="text-lg md:text-xl font-semibold text-foreground mb-4 md:mb-6">
             Your Subjects
           </h2>
 
@@ -242,7 +242,7 @@ export default function Dashboard() {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {subjects.map((subject: any) => (
                 <Link
                   key={subject.id}

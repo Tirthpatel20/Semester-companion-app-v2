@@ -155,16 +155,16 @@ export default function SubjectAnalytics() {
     <div className="min-h-screen bg-background">
       <Navigation />
 
-      <main className="max-w-7xl mx-auto px-6 py-12">
-        <div className="flex justify-end gap-3 mb-6">
+      <main className="max-w-7xl mx-auto px-4 py-6 md:px-6 md:py-12">
+        <div className="flex justify-end gap-2 md:gap-3 mb-4 md:mb-6">
           <Button
             variant="outline"
             onClick={() => setIsEditing((prev) => !prev)}
             title="Edit Subject"
             aria-label="Edit Subject"
-            className="rounded-xl px-4 py-2.5 flex items-center gap-2 hover:bg-secondary/80 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+            className="rounded-xl px-3 py-2 md:px-4 md:py-2.5 text-xs md:text-sm flex items-center gap-1.5 md:gap-2 hover:bg-secondary/80 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
           >
-            <Pencil className="w-4 h-4" />
+            <Pencil className="w-3.5 h-3.5 md:w-4 md:h-4" />
             Edit Subject
           </Button>
           <Button
@@ -175,9 +175,9 @@ export default function SubjectAnalytics() {
             }}
             title="Add Assessment"
             aria-label="Add Assessment"
-            className="rounded-xl px-4 py-2.5 flex items-center gap-2 transition-all hover:scale-105 active:scale-95 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+            className="rounded-xl px-3 py-2 md:px-4 md:py-2.5 text-xs md:text-sm flex items-center gap-1.5 md:gap-2 transition-all hover:scale-105 active:scale-95 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-3.5 h-3.5 md:w-4 md:h-4" />
             Add Assessment
           </Button>
         </div>

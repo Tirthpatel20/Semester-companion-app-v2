@@ -42,7 +42,7 @@ export default function ForgotPasswordClient() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-6 md:py-12">
       {/* Decorative blur elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/5 rounded-full blur-3xl" />
@@ -53,19 +53,19 @@ export default function ForgotPasswordClient() {
         {/* Back Button */}
         <Link
           href="/auth/login"
-          className="inline-flex items-center gap-2 text-primary hover:text-primary/80 transition-colors mb-6 font-medium"
+          className="inline-flex items-center gap-1.5 md:gap-2 text-primary hover:text-primary/80 transition-colors mb-4 md:mb-6 text-xs md:text-sm font-medium"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-3.5 h-3.5 md:w-4 md:h-4" />
           Back to Login
         </Link>
 
         {/* Logo/Branding */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-linear-to-br from-primary to-accent/80 mb-4">
-            <span className="text-white font-bold text-lg">SS</span>
+        <div className="text-center mb-6 md:mb-8">
+          <div className="inline-flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-xl bg-linear-to-br from-primary to-accent/80 mb-3 md:mb-4">
+            <span className="text-white font-bold text-base md:text-lg">SS</span>
           </div>
-          <h1 className="text-2xl font-bold text-foreground">Reset Password</h1>
-          <p className="text-sm text-muted-foreground mt-2">
+          <h1 className="text-xl md:text-2xl font-bold text-foreground">Reset Password</h1>
+          <p className="text-xs md:text-sm text-muted-foreground mt-1.5 md:mt-2">
             {isSubmitted
               ? "Check your email for reset instructions"
               : "Enter your email to receive password reset instructions"}
@@ -73,14 +73,14 @@ export default function ForgotPasswordClient() {
         </div>
 
         {/* Reset Card */}
-        <div className="glass-card rounded-2xl p-8 mb-6">
+        <div className="glass-card rounded-2xl p-5 md:p-8 mb-5 md:mb-6">
           {!isSubmitted ? (
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5" noValidate>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 md:space-y-5" noValidate>
               {/* Email Field */}
-              <div className="space-y-2">
+              <div className="space-y-1.5 md:space-y-2">
                 <label
                   htmlFor="email"
-                  className="block text-sm font-medium text-foreground"
+                  className="block text-xs md:text-sm font-medium text-foreground"
                 >
                   Email Address
                 </label>
@@ -89,9 +89,9 @@ export default function ForgotPasswordClient() {
                   id="email"
                   placeholder="name@university.edu"
                   {...form.register("email")}
-                  className="w-full px-4 py-3 rounded-lg bg-input border border-border text-foreground placeholder:text-muted-foreground transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="w-full px-3.5 py-2.5 md:px-4 md:py-3 rounded-lg bg-input border border-border text-foreground placeholder:text-muted-foreground transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
                 />
-                <p className="text-red-500 text-sm">
+                <p className="text-red-500 text-xs md:text-sm">
                   {form.formState.errors.email?.message}
                 </p>
               </div>
@@ -100,7 +100,7 @@ export default function ForgotPasswordClient() {
               <button
                 type="submit"
                 disabled={forgotPasswordMutation.isPending}
-                className="w-full py-3 rounded-lg bg-primary text-primary-foreground font-semibold transition-all duration-200 hover:shadow-lg hover:shadow-primary/50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-2.5 md:py-3 rounded-lg bg-primary text-primary-foreground font-semibold text-sm md:text-base transition-all duration-200 hover:shadow-lg hover:shadow-primary/50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {forgotPasswordMutation.isPending
                   ? "Sending..."
@@ -108,18 +108,18 @@ export default function ForgotPasswordClient() {
               </button>
             </form>
           ) : (
-            <div className="text-center py-8">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
-                <Mail className="w-8 h-8 text-primary" />
+            <div className="text-center py-6 md:py-8">
+              <div className="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 rounded-full bg-primary/10 mb-3 md:mb-4">
+                <Mail className="w-6 h-6 md:w-8 md:h-8 text-primary" />
               </div>
-              <h2 className="text-lg font-semibold text-foreground mb-2">
+              <h2 className="text-base md:text-lg font-semibold text-foreground mb-1.5 md:mb-2">
                 Email Sent
               </h2>
-              <p className="text-sm text-muted-foreground mb-6">
+              <p className="text-xs md:text-sm text-muted-foreground mb-5 md:mb-6">
                 We&apos;ve sent password reset instructions to{" "}
                 <span className="font-medium text-foreground">{submittedEmail}</span>
               </p>
-              <p className="text-xs text-muted-foreground mb-6">
+              <p className="text-[11px] md:text-xs text-muted-foreground mb-5 md:mb-6">
                 Check your spam folder if you don&apos;t see it in a few
                 minutes.
               </p>
@@ -130,7 +130,7 @@ export default function ForgotPasswordClient() {
                   setSubmittedEmail("");
                   form.reset();
                 }}
-                className="w-full py-3 rounded-lg border border-border text-foreground font-semibold transition-all duration-200 hover:bg-secondary/50"
+                className="w-full py-2.5 md:py-3 rounded-lg border border-border text-foreground font-semibold text-sm transition-all duration-200 hover:bg-secondary/50"
               >
                 Try Another Email
               </button>
