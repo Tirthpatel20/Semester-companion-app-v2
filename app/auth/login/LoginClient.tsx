@@ -46,7 +46,7 @@ export default function LoginClient() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-6 md:py-12">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-12">
       {/* Decorative blur elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/5 rounded-full blur-3xl" />
@@ -55,32 +55,32 @@ export default function LoginClient() {
 
       <div className="w-full max-w-md relative z-10">
         {/* Logo/Branding */}
-        <div className="text-center mb-6 md:mb-8">
-          <div className="inline-flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-xl bg-linear-to-br from-primary to-accent/80 mb-3 md:mb-4">
-            <span className="text-white font-bold text-base md:text-lg">
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-linear-to-br from-primary to-accent/80 mb-4">
+            <span className="text-white font-bold text-lg">
               SS
             </span>
           </div>
-          <h1 className="text-xl md:text-2xl font-bold text-foreground">
+          <h1 className="text-2xl font-bold text-foreground">
             Semester Sync
           </h1>
-          <p className="text-xs md:text-sm text-muted-foreground mt-1.5 md:mt-2">
+          <p className="text-sm text-muted-foreground mt-2">
             Welcome back to your academic dashboard
           </p>
         </div>
 
         {/* Login Card */}
-        <div className="glass-card rounded-2xl p-5 md:p-8 mb-5 md:mb-6">
+        <div className="glass-card rounded-2xl p-8 mb-6">
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-4 md:space-y-5"
+            className="space-y-5"
             noValidate
           >
             {/* Email Field */}
-            <div className="space-y-1.5 md:space-y-2">
+            <div className="space-y-2">
               <label
                 htmlFor="email"
-                className="block text-xs md:text-sm font-medium text-foreground"
+                className="block text-sm font-medium text-foreground"
               >
                 Email Address
               </label>
@@ -89,18 +89,18 @@ export default function LoginClient() {
                 id="email"
                 {...form.register("email")}
                 placeholder="name@university.edu"
-                className="w-full px-3.5 py-2.5 md:px-4 md:py-3 rounded-lg bg-input border border-border text-foreground placeholder:text-muted-foreground transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                className="w-full px-4 py-3 rounded-lg bg-input border border-border text-foreground placeholder:text-muted-foreground transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               />
-              <p className="text-red-500 text-xs md:text-sm">
+              <p className="text-red-500 text-sm">
                 {form.formState.errors.email?.message}
               </p>
             </div>
 
             {/* Password Field */}
-            <div className="space-y-1.5 md:space-y-2">
+            <div className="space-y-2">
               <label
                 htmlFor="password"
-                className="block text-xs md:text-sm font-medium text-foreground"
+                className="block text-sm font-medium text-foreground"
               >
                 Password
               </label>
@@ -110,9 +110,9 @@ export default function LoginClient() {
                   id="password"
                   {...form.register("password")}
                   placeholder="••••••••"
-                  className="w-full px-3.5 py-2.5 md:px-4 md:py-3 rounded-lg bg-input border border-border text-foreground placeholder:text-muted-foreground transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                  className="w-full px-4 py-3 rounded-lg bg-input border border-border text-foreground placeholder:text-muted-foreground transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 />
-                <p className="text-red-500 text-xs md:text-sm">
+                <p className="text-red-500 text-sm">
                   {form.formState.errors.password?.message}
                 </p>
                 <button
@@ -126,7 +126,7 @@ export default function LoginClient() {
             <div className="text-right">
               <Link
                 href="/auth/forgot-password"
-                className="text-xs md:text-sm text-primary hover:text-primary/80 transition-colors font-medium"
+                className="text-sm text-primary hover:text-primary/80 transition-colors font-medium"
               >
                 Forgot Password?
               </Link>
@@ -136,13 +136,13 @@ export default function LoginClient() {
             <button
               type="submit"
               disabled={mutation.isPending}
-              className="w-full py-2.5 md:py-3 rounded-lg bg-primary text-primary-foreground font-semibold text-sm md:text-base transition-all duration-200 hover:shadow-lg hover:shadow-primary/50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3 rounded-lg bg-primary text-primary-foreground font-semibold transition-all duration-200 hover:shadow-lg hover:shadow-primary/50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {mutation.isPending ? "Logging In" : "Log In"}
             </button>
           </form>
 
-          <div className="my-3 md:my-4 flex items-center gap-2">
+          <div className="my-3 flex items-center gap-2">
             <div className="flex-1 h-px bg-border" />
             <span className="text-[10px] text-muted-foreground">OR</span>
             <div className="flex-1 h-px bg-border" />
@@ -152,7 +152,7 @@ export default function LoginClient() {
             type="button"
             onClick={handleGoogleLogin}
             disabled={googleLoading}
-            className="w-full py-2.5 md:py-3 rounded-lg border border-border hover:bg-secondary transition-all flex items-center justify-center gap-2.5 md:gap-3 text-sm"
+            className="w-full py-3 rounded-lg border border-border hover:bg-secondary transition-all flex items-center justify-center gap-3"
           >
             {googleLoading ? (
               <>
@@ -164,7 +164,7 @@ export default function LoginClient() {
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 48 48"
-                  className="w-4 h-4 md:w-5 md:h-5"
+                  className="w-5 h-5"
                 >
                   <path
                     fill="#FFC107"
@@ -189,9 +189,9 @@ export default function LoginClient() {
           </button>
 
           {/* Divider */}
-          <div className="my-5 md:my-6 flex items-center gap-3">
+          <div className="my-6 flex items-center gap-3">
             <div className="flex-1 h-px bg-border" />
-            <span className="text-[11px] md:text-xs text-muted-foreground">
+            <span className="text-xs text-muted-foreground">
               New to Semester Companion?
             </span>
             <div className="flex-1 h-px bg-border" />
@@ -200,7 +200,7 @@ export default function LoginClient() {
           {/* Sign Up Link */}
           <Link
             href="/auth/signup"
-            className="w-full py-2.5 md:py-3 rounded-lg border border-border text-foreground font-semibold text-sm transition-all duration-200 hover:bg-secondary/50 flex items-center justify-center gap-2"
+            className="w-full py-3 rounded-lg border border-border text-foreground font-semibold transition-all duration-200 hover:bg-secondary/50 flex items-center justify-center gap-2"
           >
             Create Account
           </Link>

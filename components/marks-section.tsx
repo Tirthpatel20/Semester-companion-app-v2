@@ -109,22 +109,22 @@ export function MarksSection({
           return (
             <div
               key={assessment.id}
-              className={`${colors.bg} ${colors.border} relative group rounded-2xl p-4 md:p-6 border backdrop-blur-sm hover:scale-[1.03] transition-all duration-300`}
+              className={`${colors.bg} ${colors.border} relative group rounded-2xl p-6 border backdrop-blur-sm hover:scale-[1.03] transition-all duration-300`}
             >
               {/* Header */}
-              <div className="flex items-start justify-between mb-3 md:mb-4 relative">
+              <div className="flex items-start justify-between mb-4 relative">
                 <div className="pr-12">
-                  <h3 className="font-semibold text-foreground text-sm md:text-base">
+                  <h3 className="font-semibold text-foreground">
                     {assessment.name}
                   </h3>
 
-                  <p className="text-[11px] md:text-xs text-muted-foreground mt-0.5 md:mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     Weightage: {assessment.weightage}%
                   </p>
                 </div>
 
                 <div className="flex items-center gap-1.5 min-h-[24px]">
-                  <div className="hidden md:block text-[10px] md:text-xs bg-secondary/85 px-1.5 py-0.5 md:px-2 md:py-1 rounded-lg text-muted-foreground md:group-hover:opacity-0 md:group-focus-within:opacity-0 transition-opacity duration-200">
+                  <div className="hidden md:block text-xs bg-secondary/85 px-2 py-1 rounded-lg text-muted-foreground md:group-hover:opacity-0 md:group-focus-within:opacity-0 transition-opacity duration-200">
                     {assessment.maxMarks} Marks
                   </div>
                   <div className="absolute right-0 flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100 transition-opacity duration-200">
@@ -157,10 +157,10 @@ export function MarksSection({
               </div>
 
               {/* Marks */}
-              <div className="mb-3 md:mb-4">
+              <div className="mb-4">
                 {assessment.obtainedMarks == null ? (
                   <>
-                    <p className="text-xl md:text-2xl font-bold text-muted-foreground">
+                    <p className="text-2xl font-bold text-muted-foreground">
                       —
                     </p>
 
@@ -170,17 +170,17 @@ export function MarksSection({
                   </>
                 ) : (
                   <>
-                    <div className="flex items-baseline gap-1.5">
-                      <span className="text-2xl md:text-3xl font-bold text-foreground">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-3xl font-bold text-foreground">
                         {assessment.obtainedMarks}
                       </span>
 
-                      <span className="text-xs md:text-sm text-muted-foreground">
+                      <span className="text-sm text-muted-foreground">
                         / {assessment.maxMarks}
                       </span>
                     </div>
 
-                    <p className="text-xs md:text-sm text-primary font-medium mt-0.5 md:mt-1">
+                    <p className="text-sm text-primary font-medium mt-1">
                       {percentage}%
                     </p>
                   </>
