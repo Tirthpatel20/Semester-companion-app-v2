@@ -314,7 +314,7 @@ export default function Dashboard() {
         )}
 
         <div className="mt-16 pb-8 border-t border-border/50 pt-8 text-center text-muted-foreground text-sm">
-          <p>Semester Companion • Academic Performance Dashboard</p>
+          <p>Semester Sync • Academic Performance Dashboard</p>
         </div>
       </main>
     </div>

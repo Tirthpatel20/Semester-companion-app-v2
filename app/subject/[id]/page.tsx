@@ -299,7 +299,7 @@ export default function SubjectAnalytics() {
 
         {/* Footer */}
         <div className="border-t border-border/50 pt-8 pb-8 text-center text-muted-foreground text-sm">
-          <p>Subject Analytics • {subject.name} • Semester Companion</p>
+          <p>Subject Analytics • {subject.name} • Semester Sync</p>
         </div>
       </main>
     </div>
