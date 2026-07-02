@@ -89,101 +89,9 @@ The application focuses on providing a clean user experience while maintaining s
 
 ---
 
-# 📸 Screenshots
-
-> *(Add screenshots here)*
-
-## Dashboard
-
-![Dashboard](./screenshots/dashboard.png)
-
----
-
-## Subject Page
-
-![Subject](./screenshots/subject.png)
-
----
-
-## Attendance
-
-![Attendance](./screenshots/attendance.png)
-
----
-
-## Assessments
-
-![Assessment](./screenshots/assessment.png)
-
----
-
-## Login
-
-![Login](./screenshots/login.png)
-
----
-
 # 🚀 Live Demo
 
-https://semestersync.vercel.app
-
----
-
-# ⚙️ Installation
-
-Clone the repository
-
-```bash
-git clone https://github.com/YOUR_USERNAME/semester-sync.git
-```
-
-Go into the project
-
-```bash
-cd semester-sync
-```
-
-Install dependencies
-
-```bash
-npm install
-```
-
-Create a `.env` file
-
-```env
-DATABASE_URL=
-
-BETTER_AUTH_SECRET=
-
-BETTER_AUTH_URL=
-
-GOOGLE_CLIENT_ID=
-
-GOOGLE_CLIENT_SECRET=
-
-RESEND_API_KEY=
-```
-
-Run the development server
-
-```bash
-npm run dev
-```
-
----
-
-# 📂 Project Structure
-
-```
-app/
-components/
-db/
-lib/
-services/
-public/
-hooks/
-```
+https://semestersynnc.vercel.app
 
 ---
 
@@ -242,18 +150,9 @@ Feel free to fork the repository and submit a pull request.
 
 ---
 
-# 📄 License
-
-This project is licensed under the MIT License.
-
----
-
 # 👨‍💻 Author
 
 **Tirth Patel**
 
 LinkedIn:
-https://linkedin.com/in/YOUR_LINKEDIN
-
-GitHub:
-https://github.com/YOUR_GITHUB
+https://www.linkedin.com/in/tirth-patel-499647310/
