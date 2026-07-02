@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "SemesterSync",
-    description: "Track attendance and predict CGPA.",
+    description: "Track attendance  ",
     images: ["/opengraph-image.png"],
   },
   robots: {
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
   ],category: "Education",
   openGraph: {
     title: "SemesterSync",
-    description: "Track attendance, predict CGPA and manage your semester.",
+    description: "Track attendance, and manage your semester.",
     url: "https://semestersync.vercel.app",
     siteName: "SemesterSync",
     images: [
