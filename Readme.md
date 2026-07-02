@@ -2,7 +2,7 @@
 
 > A modern full-stack academic companion that helps students manage their semester by tracking attendance, assessments, and academic progress in one place.
 
-🌐 **Live Demo:** https://semestersync.vercel.app
+🌐 **Live Demo:** https://semestersynnc.vercel.app
 
 ---
 
