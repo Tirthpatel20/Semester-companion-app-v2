@@ -3,7 +3,7 @@ import { attendanceRecords, subjects } from "@/db/schema";
 import { calculateAttendanceStats } from "@/lib/attendance";
 import { requireSession } from "@/lib/require-session";
 
-import { and, asc, eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 export async function GET(
   request: Request,
