@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useState } from "react";
 
-
 import { Navigation } from "@/components/navigation";
 import { StatCard } from "@/components/stat-card";
 import { SubjectCard } from "@/components/subject-card";
@@ -12,7 +11,6 @@ import { EditSubjectForm } from "@/components/edit-subject-form";
 import { Button } from "@/components/ui/button";
 
 import { BookOpen, AlertCircle, Zap, Trash2 } from "lucide-react";
-
 
 import { deleteSubject } from "@/services/subjects";
 
@@ -30,8 +28,6 @@ interface Subject {
 }
 
 export default function Dashboard() {
-  
-  
   const queryClient = useQueryClient();
 
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
@@ -59,8 +55,8 @@ export default function Dashboard() {
     },
   });
 
- 
-  if ( dashboardQuery.isPending) {
+  
+  if (dashboardQuery.isPending) {
     return (
       <div className="min-h-screen bg-background">
         <Navigation />

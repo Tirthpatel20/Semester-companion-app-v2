@@ -8,9 +8,10 @@ type Message = {
 };
 
 export default function AIChatPage() {
-
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
+  const [interactionId, setInteractionId] = useState<string | null>(null);
+
   const [isLoading, setIsLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -38,7 +39,8 @@ export default function AIChatPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          messages: updatedMessages,
+          message,
+          previousInteractionId: interactionId,
         }),
       });
 
@@ -52,28 +54,46 @@ export default function AIChatPage() {
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
-      
-      let assistantText = "";
+
+      let fullResponse = "";
 
       while (true) {
         const { done, value } = await reader.read();
 
         if (done) break;
 
-        const chunk = decoder.decode(value, {
+        fullResponse += decoder.decode(value, {
           stream: true,
         });
 
-        assistantText += chunk;
+        const markerIndex = fullResponse.indexOf("\n__INTERACTION_ID__:");
+
+        const visibleText =
+          markerIndex === -1
+            ? fullResponse
+            : fullResponse.slice(0, markerIndex);
 
         setMessages([
           ...updatedMessages,
           {
             role: "assistant",
-            content: assistantText,
+            content: visibleText,
           },
         ]);
       }
+
+      const marker = "\n__INTERACTION_ID__:";
+
+      const markerIndex = fullResponse.indexOf(marker);
+
+      if (markerIndex !== -1) {
+        const newInteractionId = fullResponse
+          .slice(markerIndex + marker.length)
+          .trim();
+
+        setInteractionId(newInteractionId);
+      }
+
     } catch (error) {
       console.error(error);
     } finally {
