@@ -106,9 +106,66 @@ export const assessments = pgTable(
   ],
 );
 
+export const aiConversations = pgTable("ai_conversations", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, {
+      onDelete: "cascade",
+    }),
+
+  title: text("title").notNull(),
+
+  latestInteractionId: text("latest_interaction_id"),
+
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+});
+
+export const aiMessages = pgTable(
+  "ai_messages",
+  {
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+
+    conversationId: integer("conversation_id")
+      .notNull()
+      .references(() => aiConversations.id, {
+        onDelete: "cascade",
+      }),
+
+    role: text("role").notNull(),
+
+    content: text("content").notNull(),
+
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    check("valid_message_role", sql`${table.role} IN ('user', 'assistant')`),
+  ],
+);
+
 export const subjectRelations = relations(subjects, ({ many }) => ({
   attendanceRecords: many(attendanceRecords),
   assessments: many(assessments),
+}));
+
+export const aiConversationRelations = relations(
+  aiConversations,
+  ({ many }) => ({
+    messages: many(aiMessages),
+  }),
+);
+
+export const aiMessageRelations = relations(aiMessages, ({ one }) => ({
+  conversation: one(aiConversations, {
+    fields: [aiMessages.conversationId],
+    references: [aiConversations.id],
+  }),
 }));
 
 export const attendanceRelations = relations(attendanceRecords, ({ one }) => ({

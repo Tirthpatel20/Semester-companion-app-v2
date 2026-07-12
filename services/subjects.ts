@@ -1,9 +1,9 @@
 import type { CreateSubjectInput } from "@/lib/validations/create-subject";
 
 export async function getSubjects() {
-    const response = await fetch("/api/subjects");
+  const response = await fetch("/api/subjects");
 
-    if (!response.ok) {
+  if (!response.ok) {
     throw new Error("Failed to fetch subjects");
   }
 
@@ -23,19 +23,19 @@ export async function getSubject(id?: number) {
 }
 
 export async function createSubject(data: CreateSubjectInput) {
-    const response = await fetch("/api/subjects", {
-        method: "POST",
-        headers: {
+  const response = await fetch("/api/subjects", {
+    method: "POST",
+    headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(data),
-    })
+  });
 
-    const result = await response.json();
+  const result = await response.json();
 
-    if(!response.ok) throw new Error(result.error || "Failed to create subject");
+  if (!response.ok) throw new Error(result.error || "Failed to create subject");
 
-    return result;
+  return result;
 }
 
 export async function deleteSubject(id: number) {
@@ -52,10 +52,7 @@ export async function deleteSubject(id: number) {
   return result;
 }
 
-export async function updateSubject(
-  id: number,
-  data: CreateSubjectInput,
-) {
+export async function updateSubject(id: number, data: CreateSubjectInput) {
   const response = await fetch(`/api/subjects/${id}`, {
     method: "PATCH",
     headers: {
