@@ -14,6 +14,9 @@ import {
 import { executeTool } from "@/lib/ai/tool-executors";
 
 import { requireSession } from "@/lib/require-session";
+import { db } from "@/db";
+import { and, eq } from "drizzle-orm";
+import { aiConversations, aiMessages } from "@/db/schema";
 
 const tools = [
   attendanceTool,
@@ -22,7 +25,7 @@ const tools = [
   requiredMarksTool,
   subjectsTool,
   marksSimulationTool,
-  allSubjectsPerformanceTool
+  allSubjectsPerformanceTool,
 ];
 
 const MAX_TOOL_ROUNDS = 5;
@@ -31,10 +34,8 @@ export async function POST(request: Request) {
   try {
     const session = await requireSession();
 
-    const body = await request.json();
-
-    const message = body.message;
-    const previousInteractionId = body.previousInteractionId;
+    const { message, previousInteractionId, conversationId } =
+      await request.json();
 
     if (typeof message !== "string" || !message.trim()) {
       return Response.json(
@@ -46,6 +47,42 @@ export async function POST(request: Request) {
         },
       );
     }
+
+    if (typeof conversationId !== "number") {
+      return Response.json(
+        {
+          error: "Conversation ID is required",
+        },
+        {
+          status: 400,
+        },
+      );
+    }
+
+    const conversation = await db.query.aiConversations.findFirst({
+      where: and(
+        eq(aiConversations.id, conversationId),
+
+        eq(aiConversations.userId, session.user.id),
+      ),
+    });
+
+    if (!conversation) {
+      return Response.json(
+        {
+          error: "Conversation not found",
+        },
+        {
+          status: 404,
+        },
+      );
+    }
+
+    await db.insert(aiMessages).values({
+      conversationId,
+      role: "user",
+      content: message,
+    });
 
     const ai = new GoogleGenAI({
       apiKey: process.env.GEMINI_API_KEY,
@@ -62,6 +99,8 @@ export async function POST(request: Request) {
             previousInteractionId ?? null;
 
           let latestInteractionId: string | null = null;
+
+          let assistantResponse = "";
 
           for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
             const stream = await ai.interactions.create({
@@ -106,6 +145,7 @@ export async function POST(request: Request) {
 
               if (event.event_type === "step.delta") {
                 if (event.delta.type === "text") {
+                  assistantResponse += event.delta.text;
                   controller.enqueue(encoder.encode(event.delta.text));
                 }
 
@@ -150,6 +190,64 @@ export async function POST(request: Request) {
             ];
           }
 
+          if (assistantResponse.trim()) {
+            await db.insert(aiMessages).values({
+              conversationId,
+              role: "assistant",
+              content: assistantResponse,
+            });
+          }
+
+          await db
+            .update(aiConversations)
+            .set({
+              latestInteractionId: latestInteractionId,
+            })
+            .where(eq(aiConversations.id, conversationId));
+
+          const conversation = await db.query.aiConversations.findFirst({
+            where: and(
+              eq(aiConversations.id, conversationId),
+              eq(aiConversations.userId, session.user.id),
+            ),
+          });
+
+          if (conversation && conversation.title === "New Chat") {
+            const titleResponse = await ai.models.generateContent({
+              model: "gemini-3.1-flash-lite",
+
+              contents: `
+                Generate a very short title for this conversation.
+
+                Rules:
+                - Maximum 4 words.
+                - Do not use quotation marks.
+                - Do not end with punctuation.
+                - Return ONLY the title.
+
+                User:
+                ${message}
+
+                Assistant:
+                  ${assistantResponse}
+              `,
+            });
+
+            const generatedTitle = titleResponse.text
+              ?.trim()
+              .replace(/^["']|["']$/g, "")
+              .replace(/\.$/, "")
+              .slice(0, 60);
+
+            if (generatedTitle) {
+              await db
+                .update(aiConversations)
+                .set({
+                  title: generatedTitle,
+                })
+                .where(eq(aiConversations.id, conversationId));
+            }
+          }
           controller.enqueue(
             encoder.encode(`\n__INTERACTION_ID__:${latestInteractionId}`),
           );

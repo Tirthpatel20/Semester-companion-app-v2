@@ -28,3 +28,58 @@ export async function GET(
   });
 }
 
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id } = await params;
+  try {
+    const session = await requireSession();
+
+    const conversationId = Number(id);
+
+    if (Number.isNaN(conversationId)) {
+      return Response.json(
+        {
+          error: "Invalid conversation id",
+        },
+        {
+          status: 400,
+        },
+      );
+    }
+
+    const conversation = await db.query.aiConversations.findFirst({
+      where: and(
+        eq(aiConversations.id, conversationId),
+        eq(aiConversations.userId, session.user.id),
+      ),
+    });
+
+    if (!conversation) {
+      return Response.json(
+        {
+          error: "Conversation not found",
+        },
+        {
+          status: 404,
+        },
+      );
+    }
+
+    await db
+      .delete(aiConversations)
+      .where(eq(aiConversations.id, conversationId));
+
+    return Response.json({ success: true });
+  } catch (error) {
+    return Response.json(
+      {
+        error: "Failed to delete conversation",
+      },
+      {
+        status: 500,
+      },
+    );
+  }
+}

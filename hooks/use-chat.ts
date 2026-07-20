@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect, useRef } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getConversation, sendMessage as apiSendMessage } from "@/services/ai";
 
 export type Message = {
@@ -14,16 +14,24 @@ export function useChat(conversationId: number | null) {
   const [interactionId, setInteractionId] = useState<string | null>(null);
   const [isStreaming, setIsStreaming] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const conversationIdRef = useRef(conversationId);
+  const queryClient = useQueryClient();
 
-  // Fetch conversation detail with history
-  const { data: conversationData, isPending: isLoadingHistory, error } = useQuery({
+  const {
+    data: conversationData,
+    isPending: isLoadingHistory,
+    error,
+  } = useQuery({
     queryKey: ["conversation", conversationId],
     queryFn: () => getConversation(conversationId!),
     enabled: conversationId !== null,
     staleTime: 0,
   });
 
-  // Sync state when loaded or when switching conversations
+  useEffect(() => {
+    conversationIdRef.current = conversationId;
+  }, [conversationId]);
+
   useEffect(() => {
     if (conversationId === null) {
       setMessages([]);
@@ -39,8 +47,6 @@ export function useChat(conversationId: number | null) {
       setMessages(history);
       setInteractionId(conversationData.conversation.latestInteractionId);
     } else {
-      // While it's pending loading, don't clear immediately to avoid flickers,
-      // or clear if it is explicitly completed/empty.
       if (!isLoadingHistory) {
         setMessages([]);
         setInteractionId(null);
@@ -50,17 +56,22 @@ export function useChat(conversationId: number | null) {
 
   const sendMessage = async (content: string) => {
     const trimmed = content.trim();
+    const startedConversationId = conversationId;
+
     if (!trimmed || isLoading || isStreaming) return;
 
     const userMessage: Message = { role: "user", content: trimmed };
     const updatedMessages = [...messages, userMessage];
 
-    // Show user message and show initial loading state
     setMessages(updatedMessages);
     setIsLoading(true);
 
     try {
-      const response = await apiSendMessage(trimmed, interactionId);
+      const response = await apiSendMessage(
+        trimmed,
+        conversationId!,
+        interactionId,
+      );
 
       setIsLoading(false);
       setIsStreaming(true);
@@ -73,8 +84,15 @@ export function useChat(conversationId: number | null) {
       const decoder = new TextDecoder();
       let fullResponse = "";
 
-      // Add assistant placeholder
-      setMessages([...updatedMessages, { role: "assistant", content: "" }]);
+      if (conversationIdRef.current === startedConversationId) {
+        setMessages([
+          ...updatedMessages,
+          {
+            role: "assistant",
+            content: "",
+          },
+        ]);
+      }
 
       while (true) {
         const { done, value } = await reader.read();
@@ -84,14 +102,37 @@ export function useChat(conversationId: number | null) {
 
         const marker = "\n__INTERACTION_ID__:";
         const markerIndex = fullResponse.indexOf(marker);
-        const visibleText = markerIndex === -1 ? fullResponse : fullResponse.slice(0, markerIndex);
+        const visibleText =
+          markerIndex === -1
+            ? fullResponse
+            : fullResponse.slice(0, markerIndex);
 
-        setMessages([...updatedMessages, { role: "assistant", content: visibleText }]);
+        if (conversationIdRef.current === startedConversationId) {
+          setMessages([
+            ...updatedMessages,
+            {
+              role: "assistant",
+              content: visibleText,
+            },
+          ]);
+        }
 
         if (markerIndex !== -1) {
-          const newInteractionId = fullResponse.slice(markerIndex + marker.length).trim();
+          const newInteractionId = fullResponse
+            .slice(markerIndex + marker.length)
+            .trim();
           setInteractionId(newInteractionId);
         }
+      }
+
+      if (startedConversationId !== null) {
+        await queryClient.invalidateQueries({
+          queryKey: ["conversation", startedConversationId],
+        });
+
+        await queryClient.invalidateQueries({
+          queryKey: ["conversations"],
+        });
       }
     } catch (err) {
       console.error("Streaming error:", err);
@@ -110,3 +151,4 @@ export function useChat(conversationId: number | null) {
     error,
   };
 }
+ 

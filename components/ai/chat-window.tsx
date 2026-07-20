@@ -29,7 +29,6 @@ export function ChatWindow({
   });
 
   const chatTitle = data?.conversation?.title || "New Chat";
-
   if (!activeId) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-6 text-center bg-background/50">
@@ -40,10 +39,15 @@ export function ChatWindow({
           Start a new conversation
         </h3>
         <p className="text-sm text-muted-foreground max-w-sm mb-6 leading-relaxed">
-          Ask questions, get help with your courses, plan your study schedules, or simulate grades with Semester Sync AI.
+          Ask questions, get help with your courses, plan your study schedules,
+          or simulate grades with Semester Sync AI.
         </p>
         <div className="md:hidden">
-          <Button onClick={onOpenSidebar} variant="outline" className="flex items-center gap-2">
+          <Button
+            onClick={onOpenSidebar}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
             <Menu className="w-4 h-4" />
             View Chats
           </Button>
@@ -54,7 +58,6 @@ export function ChatWindow({
 
   return (
     <div className="flex-1 flex flex-col h-full bg-background overflow-hidden relative">
-      {/* Header */}
       <header className="h-16 border-b border-border px-6 flex items-center justify-between shrink-0 glass-nav">
         <div className="flex items-center gap-3 min-w-0">
           <Button
@@ -74,12 +77,10 @@ export function ChatWindow({
         </div>
       </header>
 
-      {/* Message List */}
       <div className="flex-1 overflow-hidden relative">
         <MessageList messages={messages} isLoading={isLoading} />
       </div>
 
-      {/* Chat Input */}
       <div className="p-4 border-t border-border shrink-0 bg-background/55 backdrop-blur-sm">
         <ChatInput
           onSendMessage={onSendMessage}

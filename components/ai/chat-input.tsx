@@ -11,7 +11,7 @@ export function ChatInput({ onSendMessage, disabled }: ChatInputProps) {
   const [input, setInput] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Auto-resize textarea height as user types
+  
   useEffect(() => {
     const textarea = textareaRef.current;
     if (textarea) {
@@ -54,7 +54,7 @@ export function ChatInput({ onSendMessage, disabled }: ChatInputProps) {
         type="submit"
         disabled={disabled || !input.trim()}
         size="icon"
-        className="h-10 w-10 rounded-xl shrink-0 transition-transform active:scale-95 bg-primary text-primary-foreground hover:bg-primary/90"
+        className="cursor-pointer h-10 w-10 rounded-xl shrink-0 transition-transform active:scale-95 bg-primary text-primary-foreground hover:bg-primary/90"
       >
         <ArrowUp className="w-5 h-5" />
       </Button>

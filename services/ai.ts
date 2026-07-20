@@ -31,7 +31,9 @@ export async function getConversations(): Promise<Conversation[]> {
   return response.json();
 }
 
-export async function getConversation(id: number): Promise<{ conversation: ConversationDetail | null }> {
+export async function getConversation(
+  id: number,
+): Promise<{ conversation: ConversationDetail | null }> {
   const response = await fetch(`/api/ai/conversations/${id}`, {
     credentials: "include",
   });
@@ -45,7 +47,10 @@ export async function getConversation(id: number): Promise<{ conversation: Conve
   return result;
 }
 
-export async function createConversation(): Promise<{ success: boolean; conversation: Conversation }> {
+export async function createConversation(): Promise<{
+  success: boolean;
+  conversation: Conversation;
+}> {
   const response = await fetch("/api/ai/conversations", {
     method: "POST",
     headers: {
@@ -64,6 +69,7 @@ export async function createConversation(): Promise<{ success: boolean; conversa
 
 export async function sendMessage(
   message: string,
+  conversationId: number,
   previousInteractionId: string | null,
 ): Promise<Response> {
   const response = await fetch("/api/ai/chat", {
@@ -74,6 +80,7 @@ export async function sendMessage(
     body: JSON.stringify({
       message,
       previousInteractionId,
+      conversationId,
     }),
   });
 
@@ -83,4 +90,18 @@ export async function sendMessage(
   }
 
   return response;
+}
+
+export async function deleteConversation(conversationId: number) {
+  const response = await fetch(`/api/ai/conversations/${conversationId}`, {
+    method: "DELETE",
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.error || "Failed to delete conversation");
+  }
+
+  return result;
 }
