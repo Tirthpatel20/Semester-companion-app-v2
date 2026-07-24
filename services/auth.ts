@@ -29,6 +29,7 @@ export async function signIn(data: SignInData) {
 
   if (result.error) throw new Error(result.error.message);
 
+
   return result.data;
 }
 
@@ -52,7 +53,7 @@ export async function signInWithGoogle() {
 export async function forgotPassword(email: string) {
   const result = await authClient.requestPasswordReset({
     email,
-    redirectTo: "http://localhost:3000/auth/reset-password",
+    redirectTo: "https://semestersynnc.vercel.app/auth/reset-password",
   });
 
   if (result.error) {
@@ -62,10 +63,7 @@ export async function forgotPassword(email: string) {
   return result.data;
 }
 
-export async function resetPassword(
-  token: string,
-  newPassword: string,
-) {
+export async function resetPassword(token: string, newPassword: string) {
   const result = await authClient.resetPassword({
     token,
     newPassword,
