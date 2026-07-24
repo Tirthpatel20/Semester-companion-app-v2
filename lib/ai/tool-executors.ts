@@ -6,6 +6,7 @@ import {
   getUserSubjects,
   simulateRequiredMarksForSubject,
   getallSubjectsPerformance,
+  getAllSubjectsAssessments,
 } from "./tool-services";
 
 type ToolArgs = {
@@ -22,8 +23,6 @@ export async function executeTool(
   args: ToolArgs,
   userId: string,
 ) {
-  console.log("Executing tool:", toolName);
-  console.log("Arguments:", args);
   switch (toolName) {
     case "getSubjectAttendance":
       if (!args.subjectName) {
@@ -76,6 +75,9 @@ export async function executeTool(
 
     case "getAllSubjectsPerformance":
       return getallSubjectsPerformance(userId);
+
+    case "getAllSubjectsAssessments":
+      return getAllSubjectsAssessments(userId);
 
     default:
       throw new Error(`Unknown tool: ${toolName}`);

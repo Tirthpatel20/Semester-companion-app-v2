@@ -9,6 +9,7 @@ import {
   subjectsTool,
   marksSimulationTool,
   allSubjectsPerformanceTool,
+  allSubjectsAssessmentsTool,
 } from "@/lib/ai/tools";
 
 import { executeTool } from "@/lib/ai/tool-executors";
@@ -19,13 +20,17 @@ import { and, eq } from "drizzle-orm";
 import { aiConversations, aiMessages } from "@/db/schema";
 
 const tools = [
+  subjectsTool,
+
   attendanceTool,
   allSubjectsAttendanceTool,
-  subjectAssessmentsTool,
+
   requiredMarksTool,
-  subjectsTool,
-  marksSimulationTool,
   allSubjectsPerformanceTool,
+  marksSimulationTool,
+
+  subjectAssessmentsTool,
+  allSubjectsAssessmentsTool,
 ];
 
 const MAX_TOOL_ROUNDS = 5;
@@ -92,6 +97,8 @@ export async function POST(request: Request) {
 
     const responseStream = new ReadableStream({
       async start(controller) {
+        let aborted = false;
+
         try {
           let currentInput: any = message;
 
@@ -128,6 +135,11 @@ export async function POST(request: Request) {
             let argumentsText = "";
 
             for await (const event of stream) {
+              if (request.signal.aborted) {
+                aborted = true;
+                break;
+              }
+
               if (event.event_type === "interaction.created") {
                 interactionId = event.interaction.id;
 
@@ -153,6 +165,10 @@ export async function POST(request: Request) {
                   argumentsText += event.delta.arguments;
                 }
               }
+            }
+
+            if (aborted) {
+              return;
             }
 
             if (!functionCallId || !functionCallName || !interactionId) {
@@ -248,12 +264,17 @@ export async function POST(request: Request) {
                 .where(eq(aiConversations.id, conversationId));
             }
           }
+
           controller.enqueue(
             encoder.encode(`\n__INTERACTION_ID__:${latestInteractionId}`),
           );
 
           controller.close();
         } catch (error) {
+          if (request.signal.aborted) {
+            return;
+          }
+
           console.error(error);
           controller.error(error);
         }

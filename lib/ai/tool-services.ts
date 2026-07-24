@@ -249,3 +249,35 @@ export async function getallSubjectsPerformance(userId: string) {
     })),
   };
 }
+
+export async function getAllSubjectsAssessments(userId: string) {
+  const userSubjects = await db.query.subjects.findMany({
+    where: eq(subjects.userId, userId),
+
+    with: {
+      assessments: true,
+    },
+  });
+
+  if (userSubjects.length === 0) {
+    return {
+      success: false,
+      error: "NO_SUBJECTS_FOUND",
+      message: "The user has not added any subjects yet.",
+    };
+  }
+
+  return {
+    success: true,
+
+    subjects: userSubjects.map((subject) => ({
+      subject: {
+        id: subject.id,
+        name: subject.name,
+        credits: subject.credits,
+      },
+
+      assessments: subject.assessments,
+    })),
+  };
+}

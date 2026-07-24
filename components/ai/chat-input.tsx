@@ -1,17 +1,23 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowUp } from "lucide-react";
+import { ArrowUp, Square } from "lucide-react";
 
 interface ChatInputProps {
   onSendMessage: (content: string) => void;
-  disabled: boolean;
+  onStopStreaming: () => void;
+  isLoading: boolean;
+  isStreaming: boolean;
 }
 
-export function ChatInput({ onSendMessage, disabled }: ChatInputProps) {
+export function ChatInput({
+  onSendMessage,
+  onStopStreaming,
+  isStreaming,
+  isLoading,
+}: ChatInputProps) {
   const [input, setInput] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  
   useEffect(() => {
     const textarea = textareaRef.current;
     if (textarea) {
@@ -23,7 +29,7 @@ export function ChatInput({ onSendMessage, disabled }: ChatInputProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const message = input.trim();
-    if (!message || disabled) return;
+    if (!message || isLoading || isStreaming) return;
 
     onSendMessage(message);
     setInput("");
@@ -37,7 +43,10 @@ export function ChatInput({ onSendMessage, disabled }: ChatInputProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex gap-2 items-end max-w-3xl mx-auto w-full">
+    <form
+      onSubmit={handleSubmit}
+      className="flex gap-2 items-end max-w-3xl mx-auto w-full"
+    >
       <div className="flex-1 relative flex items-center bg-secondary/40 border border-border rounded-xl focus-within:ring-1 focus-within:ring-primary focus-within:border-primary transition-all">
         <textarea
           ref={textareaRef}
@@ -46,17 +55,22 @@ export function ChatInput({ onSendMessage, disabled }: ChatInputProps) {
           onKeyDown={handleKeyDown}
           placeholder="Ask Semester Sync AI..."
           rows={1}
-          disabled={disabled}
+          disabled={isStreaming || isLoading}
           className="w-full bg-transparent px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground resize-none focus:outline-none max-h-40 min-h-[40px] align-middle"
         />
       </div>
       <Button
-        type="submit"
-        disabled={disabled || !input.trim()}
+        type={isStreaming ? "button" : "submit"}
+        onClick={isStreaming ? onStopStreaming : undefined}
+        disabled={isLoading || (!isStreaming && !input.trim())}
         size="icon"
         className="cursor-pointer h-10 w-10 rounded-xl shrink-0 transition-transform active:scale-95 bg-primary text-primary-foreground hover:bg-primary/90"
       >
-        <ArrowUp className="w-5 h-5" />
+        {isStreaming ? (
+          <Square className="w-4 h-4 fill-current" />
+        ) : (
+          <ArrowUp className="w-5 h-5" />
+        )}
       </Button>
     </form>
   );

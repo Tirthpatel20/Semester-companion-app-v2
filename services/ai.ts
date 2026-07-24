@@ -71,6 +71,7 @@ export async function sendMessage(
   message: string,
   conversationId: number,
   previousInteractionId: string | null,
+  signal?: AbortSignal,
 ): Promise<Response> {
   const response = await fetch("/api/ai/chat", {
     method: "POST",
@@ -82,6 +83,7 @@ export async function sendMessage(
       previousInteractionId,
       conversationId,
     }),
+    signal,
   });
 
   if (!response.ok) {
@@ -101,6 +103,27 @@ export async function deleteConversation(conversationId: number) {
 
   if (!response.ok) {
     throw new Error(result.error || "Failed to delete conversation");
+  }
+
+  return result;
+}
+
+export async function renameConversation(
+  conversationId: number,
+  title: string,
+) {
+  const response = await fetch(`/api/ai/conversations/${conversationId}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ title }),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.error || "Failed to rename conversation");
   }
 
   return result;

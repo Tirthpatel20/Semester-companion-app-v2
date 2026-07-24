@@ -13,8 +13,8 @@ export function useChat(conversationId: number | null) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [interactionId, setInteractionId] = useState<string | null>(null);
   const [isStreaming, setIsStreaming] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const conversationIdRef = useRef(conversationId);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const queryClient = useQueryClient();
 
   const {
@@ -54,27 +54,39 @@ export function useChat(conversationId: number | null) {
     }
   }, [conversationId, conversationData, isLoadingHistory]);
 
+  const stopStreaming = () => {
+    abortControllerRef.current?.abort();
+  };
+
   const sendMessage = async (content: string) => {
     const trimmed = content.trim();
     const startedConversationId = conversationId;
 
-    if (!trimmed || isLoading || isStreaming) return;
+    if (!trimmed || isStreaming) return;
 
     const userMessage: Message = { role: "user", content: trimmed };
-    const updatedMessages = [...messages, userMessage];
 
-    setMessages(updatedMessages);
-    setIsLoading(true);
+    setMessages((previous) => [
+      ...previous,
+      userMessage,
+      {
+        role: "assistant",
+        content: "",
+      },
+    ]);
 
     try {
+      setIsStreaming(true);
+
+      const abortController = new AbortController();
+      abortControllerRef.current = abortController;
+
       const response = await apiSendMessage(
         trimmed,
         conversationId!,
         interactionId,
+        abortController.signal,
       );
-
-      setIsLoading(false);
-      setIsStreaming(true);
 
       if (!response.body) {
         throw new Error("Response body is missing");
@@ -83,16 +95,6 @@ export function useChat(conversationId: number | null) {
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let fullResponse = "";
-
-      if (conversationIdRef.current === startedConversationId) {
-        setMessages([
-          ...updatedMessages,
-          {
-            role: "assistant",
-            content: "",
-          },
-        ]);
-      }
 
       while (true) {
         const { done, value } = await reader.read();
@@ -108,13 +110,24 @@ export function useChat(conversationId: number | null) {
             : fullResponse.slice(0, markerIndex);
 
         if (conversationIdRef.current === startedConversationId) {
-          setMessages([
-            ...updatedMessages,
-            {
+          setMessages((previous) => {
+            if (previous.length === 0) return previous;
+
+            const next = [...previous];
+
+            const last = next[next.length - 1];
+
+            if (last.role !== "assistant") {
+              return previous;
+            }
+
+            next[next.length - 1] = {
               role: "assistant",
               content: visibleText,
-            },
-          ]);
+            };
+
+            return next;
+          });
         }
 
         if (markerIndex !== -1) {
@@ -125,30 +138,45 @@ export function useChat(conversationId: number | null) {
         }
       }
 
+      setIsStreaming(false);
+
       if (startedConversationId !== null) {
-        await queryClient.invalidateQueries({
+        queryClient.invalidateQueries({
           queryKey: ["conversation", startedConversationId],
         });
 
-        await queryClient.invalidateQueries({
+        queryClient.invalidateQueries({
           queryKey: ["conversations"],
         });
       }
     } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") {
+        setMessages((previous) => {
+          const last = previous[previous.length - 1];
+
+          if (last?.role === "assistant" && last.content === "") {
+            return previous.slice(0, -1);
+          }
+
+          return previous;
+        });
+        return;
+      }
+
       console.error("Streaming error:", err);
     } finally {
-      setIsLoading(false);
+      abortControllerRef.current = null;
       setIsStreaming(false);
     }
   };
 
   return {
     messages,
-    isLoading: isLoading || isLoadingHistory,
+    isLoading: isLoadingHistory,
     isStreaming,
     interactionId,
     sendMessage,
+    stopStreaming,
     error,
   };
 }
- 

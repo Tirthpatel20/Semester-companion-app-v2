@@ -10,7 +10,7 @@ export default function AIChatPage() {
   const [activeConversationId, setActiveConversationId] = useState<number | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const { messages, isLoading, isStreaming, sendMessage } = useChat(activeConversationId);
+  const { messages, isLoading, isStreaming, sendMessage, stopStreaming } = useChat(activeConversationId);
 
   return (
     <div className="flex flex-col h-screen bg-background overflow-hidden">
@@ -31,6 +31,7 @@ export default function AIChatPage() {
           isStreaming={isStreaming}
           onSendMessage={sendMessage}
           onOpenSidebar={() => setIsSidebarOpen(true)}
+          onStopStreaming={stopStreaming}
         />
       </div>
     </div>

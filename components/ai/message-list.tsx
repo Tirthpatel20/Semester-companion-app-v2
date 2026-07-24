@@ -5,9 +5,14 @@ import { Sparkles } from "lucide-react";
 interface MessageListProps {
   messages: { role: "user" | "assistant"; content: string }[];
   isLoading: boolean;
+  isStreaming: boolean;
 }
 
-export function MessageList({ messages, isLoading }: MessageListProps) {
+export function MessageList({
+  messages,
+  isLoading,
+  isStreaming,
+}: MessageListProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -25,32 +30,23 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
             How can I help you today?
           </p>
           <p className="text-xs text-muted-foreground max-w-xs mt-1">
-            Ask about your subjects, attendance status, assessments or run simulations!
+            Ask about your subjects, attendance status, assessments or run
+            simulations!
           </p>
         </div>
       )}
 
       {messages.map((message, index) => (
-        <MessageItem key={index} message={message} />
+        <MessageItem
+          key={index}
+          message={message}
+          isStreaming={
+            isStreaming &&
+            index === messages.length - 1 &&
+            message.role === "assistant"
+          }
+        />
       ))}
-
-      {isLoading && (
-        <div className="flex items-start gap-4 mr-auto max-w-3xl w-full">
-          <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-            <Sparkles className="w-4 h-4 text-primary animate-pulse" />
-          </div>
-          <div className="flex-1 space-y-2 py-1 min-w-0">
-            <div className="text-xs font-semibold text-primary">
-              Semester Sync AI
-            </div>
-            <div className="flex items-center gap-1.5 py-2 px-4 bg-muted/20 border border-white/5 rounded-2xl rounded-tl-none w-fit">
-              <span className="h-2 w-2 bg-primary/75 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-              <span className="h-2 w-2 bg-primary/75 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-              <span className="h-2 w-2 bg-primary/75 rounded-full animate-bounce"></span>
-            </div>
-          </div>
-        </div>
-      )}
 
       <div ref={bottomRef} className="h-2 shrink-0" />
     </div>

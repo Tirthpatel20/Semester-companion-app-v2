@@ -12,6 +12,7 @@ interface ChatWindowProps {
   isStreaming: boolean;
   onSendMessage: (content: string) => void;
   onOpenSidebar: () => void;
+  onStopStreaming: () => void;
 }
 
 export function ChatWindow({
@@ -21,6 +22,7 @@ export function ChatWindow({
   isStreaming,
   onSendMessage,
   onOpenSidebar,
+  onStopStreaming,
 }: ChatWindowProps) {
   const { data } = useQuery({
     queryKey: ["conversation", activeId],
@@ -78,13 +80,15 @@ export function ChatWindow({
       </header>
 
       <div className="flex-1 overflow-hidden relative">
-        <MessageList messages={messages} isLoading={isLoading} />
+        <MessageList messages={messages} isLoading={isLoading} isStreaming={isStreaming} />
       </div>
 
       <div className="p-4 border-t border-border shrink-0 bg-background/55 backdrop-blur-sm">
         <ChatInput
           onSendMessage={onSendMessage}
-          disabled={isLoading || isStreaming}
+          onStopStreaming={onStopStreaming}
+          isLoading={isLoading}
+          isStreaming={isStreaming}
         />
       </div>
     </div>

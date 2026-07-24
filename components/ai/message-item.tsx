@@ -8,9 +8,10 @@ interface MessageItemProps {
     role: "user" | "assistant";
     content: string;
   };
+  isStreaming?: boolean;
 }
 
-export function MessageItem({ message }: MessageItemProps) {
+export function MessageItem({ message, isStreaming }: MessageItemProps) {
   const isUser = message.role === "user";
 
   return (
@@ -46,123 +47,137 @@ export function MessageItem({ message }: MessageItemProps) {
         </div>
         <div
           className={cn(
-            "px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap break-words",
+            "px-4 py-3 rounded-2xl text-sm leading-relaxed break-words",
             isUser
               ? "bg-primary text-primary-foreground font-medium rounded-tr-none ml-auto w-fit max-w-[85%]"
               : "glass-card border-white/5 rounded-tl-none text-foreground w-fit max-w-[85%]",
           )}
         >
-          <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
-            components={{
-              h1: ({ children }) => (
-                <h1 className="text-lg font-bold mt-4 mb-2 text-foreground">
-                  {children}
-                </h1>
-              ),
-
-              h2: ({ children }) => (
-                <h2 className="text-base font-semibold mt-4 mb-2 text-foreground">
-                  {children}
-                </h2>
-              ),
-
-              h3: ({ children }) => (
-                <h3 className="text-sm font-semibold mt-3 mb-2 text-foreground">
-                  {children}
-                </h3>
-              ),
-
-              p: ({ children }) => (
-                <p className="mb-3 last:mb-0 leading-7">{children}</p>
-              ),
-
-              ul: ({ children }) => (
-                <ul className="list-disc pl-5 mb-3 space-y-1">{children}</ul>
-              ),
-
-              ol: ({ children }) => (
-                <ol className="list-decimal pl-5 mb-3 space-y-1">{children}</ol>
-              ),
-
-              li: ({ children }) => <li className="leading-7">{children}</li>,
-
-              strong: ({ children }) => (
-                <strong className="font-semibold text-foreground">
-                  {children}
-                </strong>
-              ),
-
-              em: ({ children }) => <em className="italic">{children}</em>,
-
-              hr: () => <hr className="my-4 border-border" />,
-
-              blockquote: ({ children }) => (
-                <blockquote className="border-l-4 border-primary pl-4 italic text-muted-foreground my-3">
-                  {children}
-                </blockquote>
-              ),
-
-              code(props) {
-                const { children, className } = props;
-
-                const inline = !className;
-
-                if (inline) {
-                  return (
-                    <code className="rounded bg-secondary px-1.5 py-0.5 font-mono text-xs">
-                      {children}
-                    </code>
-                  );
-                }
-
-                return (
-                  <pre className="overflow-x-auto rounded-lg bg-secondary p-4 my-3">
-                    <code className={className}>{children}</code>
-                  </pre>
-                );
-              },
-
-              table: ({ children }) => (
-                <div className="overflow-x-auto my-4">
-                  <table className="min-w-full border border-border rounded-lg overflow-hidden">
+          {message.content ? (
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                h1: ({ children }) => (
+                  <h1 className="text-lg font-bold mt-4 mb-2 text-inherit">
                     {children}
-                  </table>
-                </div>
-              ),
+                  </h1>
+                ),
 
-              thead: ({ children }) => (
-                <thead className="bg-secondary">{children}</thead>
-              ),
+                h2: ({ children }) => (
+                  <h2 className="text-base font-semibold mt-4 mb-2 text-inherit">
+                    {children}
+                  </h2>
+                ),
 
-              tbody: ({ children }) => <tbody>{children}</tbody>,
+                h3: ({ children }) => (
+                  <h3 className="text-sm font-semibold mt-3 mb-2 text-inherit">
+                    {children}
+                  </h3>
+                ),
 
-              tr: ({ children }) => (
-                <tr className="border-b border-border">{children}</tr>
-              ),
+                p: ({ children }) => (
+                  <p className="mb-3 last:mb-0 leading-relaxed whitespace-pre-wrap">
+                    {children}
+                  </p>
+                ),
 
-              th: ({ children }) => (
-                <th className="px-3 py-2 text-left font-semibold">
-                  {children}
-                </th>
-              ),
+                ul: ({ children }) => (
+                  <ul className="list-disc pl-5 mb-3 space-y-1">{children}</ul>
+                ),
 
-              td: ({ children }) => <td className="px-3 py-2">{children}</td>,
+                ol: ({ children }) => (
+                  <ol className="list-decimal pl-5 mb-3 space-y-1">
+                    {children}
+                  </ol>
+                ),
 
-              a: ({ children, href }) => (
-                <a
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary underline underline-offset-4 hover:opacity-80"
-                >
-                  {children}
-                </a>
-              ),
-            }}
-          >
-            {message.content}
-          </ReactMarkdown>
+                li: ({ children }) => (
+                  <li className="leading-relaxed">{children}</li>
+                ),
+
+                strong: ({ children }) => (
+                  <strong className="font-semibold text-inherit">
+                    {children}
+                  </strong>
+                ),
+
+                em: ({ children }) => <em className="italic">{children}</em>,
+
+                hr: () => <hr className="my-4 border-border" />,
+
+                blockquote: ({ children }) => (
+                  <blockquote className="border-l-4 border-primary/50 pl-4 italic text-muted-foreground my-3">
+                    {children}
+                  </blockquote>
+                ),
+
+                code(props) {
+                  const { children, className } = props;
+
+                  const inline = !className;
+
+                  if (inline) {
+                    return (
+                      <code className="rounded bg-black/20 px-1.5 py-0.5 font-mono text-xs">
+                        {children}
+                      </code>
+                    );
+                  }
+
+                  return (
+                    <pre className="overflow-x-auto rounded-lg bg-black/20 p-4 my-3 font-mono text-xs">
+                      <code className={className}>{children}</code>
+                    </pre>
+                  );
+                },
+
+                table: ({ children }) => (
+                  <div className="overflow-x-auto my-4">
+                    <table className="min-w-full border border-border rounded-lg overflow-hidden">
+                      {children}
+                    </table>
+                  </div>
+                ),
+
+                thead: ({ children }) => (
+                  <thead className="bg-secondary">{children}</thead>
+                ),
+
+                tbody: ({ children }) => <tbody>{children}</tbody>,
+
+                tr: ({ children }) => (
+                  <tr className="border-b border-border">{children}</tr>
+                ),
+
+                th: ({ children }) => (
+                  <th className="px-3 py-2 text-left font-semibold">
+                    {children}
+                  </th>
+                ),
+
+                td: ({ children }) => <td className="px-3 py-2">{children}</td>,
+
+                a: ({ children, href }) => (
+                  <a
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline underline-offset-4 hover:opacity-80"
+                  >
+                    {children}
+                  </a>
+                ),
+              }}
+            >
+              {message.content}
+            </ReactMarkdown>
+          ) : isStreaming ? (
+            <div className="flex items-center gap-1 py-1 px-1">
+              <span className="h-2 w-2 rounded-full bg-primary/70 animate-bounce [animation-delay:-0.3s]" />
+              <span className="h-2 w-2 rounded-full bg-primary/70 animate-bounce [animation-delay:-0.15s]" />
+              <span className="h-2 w-2 rounded-full bg-primary/70 animate-bounce" />
+            </div>
+          ) : null}
         </div>
       </div>
     </div>

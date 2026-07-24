@@ -161,3 +161,17 @@ export const allSubjectsPerformanceTool = {
     properties: {},
   },
 };
+
+export const allSubjectsAssessmentsTool = {
+  type: "function" as const,
+
+  name: "getAllSubjectsAssessments",
+
+  description:
+    "Get assessment data for all subjects of the authenticated student, including marks obtained, maximum marks, and weightage. Use this when the user asks about assessments across multiple subjects, all quizzes, all assignments, remaining assessments, or wants to compare assessment information.",
+
+  parameters: {
+    type: "object",
+    properties: {},
+  },
+};
