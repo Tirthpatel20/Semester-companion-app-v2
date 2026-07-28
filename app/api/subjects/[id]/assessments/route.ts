@@ -130,7 +130,7 @@ export async function POST(
         maxMarks: body.maxMarks,
         weightage: body.weightage,
         obtainedMarks: body.obtainedMarks ?? null,
-      })
+      } as any)
       .returning();
 
     return Response.json(

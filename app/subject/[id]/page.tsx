@@ -8,12 +8,12 @@ import { AssessmentForm } from "@/components/assessment-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getSubject } from "@/services/subjects";
 import { Button } from "@/components/ui/button";
-import { Pencil, Plus } from "lucide-react";
+import { Pencil, Plus, Sparkles } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { getAttendance, markAttendance } from "@/services/attendance";
 import { AttendanceStatus } from "@/types";
 import { toast } from "sonner";
-import { MarkAttendance } from "@/components/mark-attendance";
+import { AttendanceHistory } from "@/components/attendance-history";
 import { useEffect, useState } from "react";
 import { EditSubjectForm } from "@/components/edit-subject-form";
 import { getAssessments } from "@/services/assessments";
@@ -71,17 +71,29 @@ export default function SubjectAnalytics() {
     queryFn: () => getSubject(id),
   });
 
-  const markAttendanceMutation = useMutation({
-    mutationFn: (status: AttendanceStatus) => markAttendance(id, status),
-    onSuccess: (_, status) => {
-      toast.success(`Attendance marked as ${status}.`);
+  const updatePastAttendanceMutation = useMutation({
+    mutationFn: ({
+      status,
+      date,
+    }: {
+      status: AttendanceStatus;
+      date: string;
+    }) => markAttendance(id, status, date),
+    onSuccess: (_, variables) => {
+      toast.success(`Attendance updated for ${variables.date}.`);
 
       queryClient.invalidateQueries({
         queryKey: ["attendance", id],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["subject", id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["dashboard"],
+      });
     },
 
-    onError: (error) => {
+    onError: (error: any) => {
       toast.error(error.message);
     },
   });
@@ -149,7 +161,22 @@ export default function SubjectAnalytics() {
   const subject = getSubjectQuery.data.subject;
   const assessments = assessmentsQuery.data.assessments;
 
-  const today = new Date().toISOString().split("T")[0];
+  const historyRecords = records.map((record: Record) => ({
+    id: String(record.id),
+    date: new Date(record.attendanceDate),
+    status: record.status.toLowerCase() as 'present' | 'absent' | 'cancelled',
+  }));
+
+  const handleRecordChange = (record: any, newStatus: string) => {
+    const capitalizedStatus = (newStatus.charAt(0).toUpperCase() + newStatus.slice(1)) as any;
+    const formattedDate = new Date(record.date).toISOString().split("T")[0];
+    updatePastAttendanceMutation.mutate({
+      status: capitalizedStatus,
+      date: formattedDate,
+    });
+  };
+
+  const isCompleted = stats.completedClasses >= (subject.totalClasses - (stats.cancelled ?? 0));
 
   return (
     <div className="min-h-screen bg-background">
@@ -188,6 +215,15 @@ export default function SubjectAnalytics() {
           attendance={stats.attendancePercentage || 0}
         />
 
+        {isCompleted && (
+          <div className="mt-6 mb-8 p-4 bg-primary/10 border border-primary/20 rounded-2xl flex items-center justify-between text-primary font-medium text-sm animate-pulse">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-primary" />
+              <span>All planned classes for this subject have been conducted. Semester completed!</span>
+            </div>
+          </div>
+        )}
+
         {isEditing && (
           <EditSubjectForm
             subjectId={subject.id}
@@ -196,18 +232,10 @@ export default function SubjectAnalytics() {
               credits: subject.credits,
               totalClasses: subject.totalClasses,
             }}
+            conductedClasses={stats.completedClasses}
             onClose={() => setIsEditing(false)}
           />
         )}
-
-        <MarkAttendance
-          currentStatus={
-            records.find((record: Record) => record.attendanceDate === today)
-              ?.status
-          }
-          isPending={markAttendanceMutation.isPending}
-          onMarkAttendance={(status) => markAttendanceMutation.mutate(status)}
-        />
 
         {/* Attendance Section */}
         <div className="mb-8">
@@ -215,11 +243,22 @@ export default function SubjectAnalytics() {
             attendance={stats.attendancePercentage}
             presentClasses={stats.present}
             absentClasses={stats.absent}
-            totalClasses={subject.totalClasses}
+            totalClasses={subject.totalClasses - (stats.cancelled ?? 0)}
             canSkip={stats.classesCanSkip ?? 0}
             needFor75={stats.classesNeeded ?? 0}
             
             hasRecords={records.length > 0}
+          />
+        </div>
+
+        {/* Attendance History Section */}
+        <div className="mb-8">
+          <AttendanceHistory
+            records={historyRecords}
+            isLoading={updatePastAttendanceMutation.isPending}
+            onRecordChange={handleRecordChange}
+            minDate={subject.semesterStartDate ? new Date(subject.semesterStartDate) : undefined}
+            maxDate={subject.semesterEndDate ? new Date(subject.semesterEndDate) : undefined}
           />
         </div>
         {isAssessmentFormOpen && (
@@ -238,7 +277,7 @@ export default function SubjectAnalytics() {
         <MarksSection
           assessments={assessments}
           onEdit={(assessment) => {
-            setEditingAssessment(assessment);
+            setEditingAssessment(assessment as any);
             setIsAssessmentFormOpen(true);
           }}
           onDelete={(assessmentId) => {

@@ -15,6 +15,7 @@ export async function getAttendance(subjectId: number) {
 export async function markAttendance(
   subjectId: number,
   status: AttendanceStatus,
+  attendanceDate?: string,
 ) {
   const response = await fetch(`/api/subjects/${subjectId}/attendance`, {
     method: "POST",
@@ -23,7 +24,7 @@ export async function markAttendance(
     },
     body: JSON.stringify({
       status,
-      attendanceDate: new Date().toISOString().split("T")[0],
+      attendanceDate: attendanceDate ?? new Date().toISOString().split("T")[0],
     }),
   });
 

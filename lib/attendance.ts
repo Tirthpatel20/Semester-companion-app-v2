@@ -5,6 +5,7 @@ export function calculateAttendanceStats(records: AttendanceRecord[]) {
   const requiredAttendance = 75;
 
   const absent = records.filter((r) => r.status === "Absent").length;
+  const cancelled = records.filter((r) => r.status === "Cancelled").length;
   const completedClasses = present + absent;
 
   let classesCanSkip = 0;
@@ -17,6 +18,7 @@ export function calculateAttendanceStats(records: AttendanceRecord[]) {
     return {
       present: 0,
       absent: 0,
+      cancelled,
       completedClasses: 0,
       attendancePercentage: 0,
       classesNeeded: null,
@@ -45,9 +47,11 @@ export function calculateAttendanceStats(records: AttendanceRecord[]) {
   return {
     present,
     absent,
+    cancelled,
     completedClasses,
     attendancePercentage,
     classesNeeded,
     classesCanSkip,
   };
 }
+

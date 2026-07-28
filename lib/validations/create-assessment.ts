@@ -132,5 +132,10 @@ export const createAssessmentSchema = z
     }
   );
 
-export type CreateAssessmentFormValues = z.input<typeof createAssessmentSchema>;
+export type CreateAssessmentFormValues = {
+  name: string;
+  maxMarks?: number;
+  obtainedMarks?: number;
+  weightage?: number;
+};
 export type CreateAssessmentInput = z.output<typeof createAssessmentSchema>;

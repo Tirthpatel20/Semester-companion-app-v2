@@ -1,11 +1,11 @@
 "use client";
 
-import { CheckCircle2, XCircle, CalendarDays } from "lucide-react";
+import { CheckCircle2, XCircle, Ban, CalendarDays } from "lucide-react";
 
 interface MarkAttendanceProps {
-  currentStatus?: "Present" | "Absent";
+  currentStatus?: "Present" | "Absent" | "Cancelled";
   isPending: boolean;
-  onMarkAttendance: (status: "Present" | "Absent") => void;
+  onMarkAttendance: (status: "Present" | "Absent" | "Cancelled") => void;
 }
 
 export function MarkAttendance({
@@ -38,7 +38,9 @@ export function MarkAttendance({
             className={`ml-2 font-semibold ${
               currentStatus === "Present"
                 ? "text-primary"
-                : "text-destructive"
+                : currentStatus === "Absent"
+                ? "text-destructive"
+                : "text-muted-foreground"
             }`}
           >
             {currentStatus}
@@ -46,11 +48,11 @@ export function MarkAttendance({
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-3 gap-4">
         <button
           disabled={isPending}
           onClick={() => onMarkAttendance("Present")}
-          className="flex items-center justify-center gap-2 rounded-xl bg-primary text-primary-foreground py-4 font-semibold transition-all hover:scale-[1.02] disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+          className="flex items-center justify-center gap-2 rounded-xl bg-primary text-primary-foreground py-4 font-semibold transition-all hover:scale-[1.02] disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none text-sm md:text-base"
           title="Mark present"
           aria-label="Mark present for today"
         >
@@ -61,12 +63,23 @@ export function MarkAttendance({
         <button
           disabled={isPending}
           onClick={() => onMarkAttendance("Absent")}
-          className="flex items-center justify-center gap-2 rounded-xl bg-destructive text-white py-4 font-semibold transition-all hover:scale-[1.02] disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-destructive focus-visible:outline-none"
+          className="flex items-center justify-center gap-2 rounded-xl bg-destructive text-white py-4 font-semibold transition-all hover:scale-[1.02] disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-destructive focus-visible:outline-none text-sm md:text-base"
           title="Mark absent"
           aria-label="Mark absent for today"
         >
           <XCircle className="w-5 h-5" />
           Absent
+        </button>
+
+        <button
+          disabled={isPending}
+          onClick={() => onMarkAttendance("Cancelled")}
+          className="flex items-center justify-center gap-2 rounded-xl bg-secondary text-secondary-foreground py-4 font-semibold transition-all hover:scale-[1.02] disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-muted focus-visible:outline-none border border-border text-sm md:text-base"
+          title="Mark cancelled"
+          aria-label="Mark cancelled for today"
+        >
+          <Ban className="w-5 h-5" />
+          Cancelled
         </button>
       </div>
     </div>

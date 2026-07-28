@@ -1,4 +1,4 @@
-import type { CreateSubjectInput } from "@/lib/validations/create-subject";
+import type { CreateSubjectInput, EditSubjectInput } from "@/lib/validations/create-subject";
 
 export async function getSubjects() {
   const response = await fetch("/api/subjects");
@@ -52,7 +52,7 @@ export async function deleteSubject(id: number) {
   return result;
 }
 
-export async function updateSubject(id: number, data: CreateSubjectInput) {
+export async function updateSubject(id: number, data: EditSubjectInput) {
   const response = await fetch(`/api/subjects/${id}`, {
     method: "PATCH",
     headers: {

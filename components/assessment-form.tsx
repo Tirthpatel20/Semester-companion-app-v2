@@ -36,7 +36,7 @@ export function AssessmentForm({
   const queryClient = useQueryClient();
 
   const form = useForm<CreateAssessmentFormValues>({
-    resolver: zodResolver(createAssessmentSchema),
+    resolver: zodResolver(createAssessmentSchema) as any,
 
     defaultValues: {
       name: assessment?.name ?? "",
@@ -80,8 +80,13 @@ export function AssessmentForm({
     },
   });
 
-  const onSubmit = (data: CreateAssessmentInput) => {
-    assessmentMutation.mutate(data);
+  const onSubmit = (data: CreateAssessmentFormValues) => {
+    try {
+      const parsed = createAssessmentSchema.parse(data);
+      assessmentMutation.mutate(parsed);
+    } catch (e: any) {
+      toast.error("Form validation failed. Please check your inputs.");
+    }
   };
 
   const handleClose = () => {
@@ -94,14 +99,14 @@ export function AssessmentForm({
   console.log(weightage)
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/40 backdrop-blur-md overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/40 backdrop-blur-md overflow-hidden"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           handleClose();
         }
       }}
     >
-      <div className="glass-card rounded-2xl p-8 border border-primary/20 w-full max-w-lg shadow-2xl relative">
+      <div className="glass-card rounded-2xl p-8 border border-primary/20 w-full max-w-lg max-h-[90vh] overflow-y-auto custom-scrollbar shadow-2xl relative">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-foreground">
             {assessment ? "Edit Assessment" : "Add Assessment"}
@@ -196,7 +201,7 @@ export function AssessmentForm({
             </div>
 
             {/* Percentage Display */}
-            {obtainedMarks != null && maxMarks > 0 && (
+            {obtainedMarks != null && typeof maxMarks === "number" && maxMarks > 0 && (
               <div className="bg-secondary/30 rounded-lg p-4 border border-primary/20">
                 <p className="text-sm text-muted-foreground mb-1">Percentage</p>
                 <p className="text-3xl font-bold text-primary">

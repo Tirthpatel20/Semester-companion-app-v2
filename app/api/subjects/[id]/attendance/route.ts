@@ -79,7 +79,7 @@ export async function POST(
 
     if (
       !body.status ||
-      !["Present", "Absent"].includes(body.status)
+      !["Present", "Absent", "Cancelled"].includes(body.status)
     ) {
       return Response.json(
         {

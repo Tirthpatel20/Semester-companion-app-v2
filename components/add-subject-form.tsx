@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useState } from "react";
-import { Plus, X } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { Plus, X, Calendar, AlertCircle } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -52,18 +52,76 @@ export function AddSubjectForm({
     },
   });
 
-  const onSubmit = (data: CreateSubjectInput) => {
-    createSubjectMutation.mutate(data);
-  };
-
   const form = useForm<CreateSubjectFormValues>({
-    resolver: zodResolver(createSubjectSchema),
+    resolver: zodResolver(createSubjectSchema) as any,
     defaultValues: {
       name: "",
       credits: undefined,
+      setupMethod: "automatic",
       totalClasses: undefined,
+      semesterStartDate: "",
+      semesterEndDate: "",
+      presentClasses: undefined,
+      conductedClasses: undefined,
     },
   });
+
+  const onSubmit = (data: CreateSubjectFormValues) => {
+    try {
+      const parsed = createSubjectSchema.parse(data);
+      createSubjectMutation.mutate(parsed);
+    } catch (e: any) {
+      toast.error("Form validation failed. Please check your inputs.");
+    }
+  };
+
+  const watchSetupMethod = form.watch("setupMethod");
+  const watchCredits = form.watch("credits");
+  const watchStartDate = form.watch("semesterStartDate");
+  const watchEndDate = form.watch("semesterEndDate");
+
+  // Determine if we should show the attendance import section
+  let showAttendanceImport = false;
+  if (watchSetupMethod === "manual") {
+    showAttendanceImport = true;
+  } else if (watchSetupMethod === "automatic" && watchStartDate) {
+    const start = new Date(watchStartDate);
+    if (!isNaN(start.getTime())) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      start.setHours(0, 0, 0, 0);
+      if (today >= start) {
+        showAttendanceImport = true;
+      }
+    }
+  }
+
+  // Clear attendance fields if the import section becomes hidden
+  useEffect(() => {
+    if (!showAttendanceImport) {
+      form.setValue("presentClasses", undefined);
+      form.setValue("conductedClasses", undefined);
+    }
+  }, [showAttendanceImport, form]);
+
+  // Calculate live estimation
+  let estimatedClasses = 0;
+  let weeksCount = 0;
+  if (
+    watchSetupMethod === "automatic" &&
+    typeof watchCredits === "number" &&
+    watchStartDate &&
+    watchEndDate
+  ) {
+    const start = new Date(watchStartDate);
+    const end = new Date(watchEndDate);
+    if (!isNaN(start.getTime()) && !isNaN(end.getTime()) && end > start) {
+      const diffTime = Math.abs(end.getTime() - start.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      weeksCount = Number((diffDays / 7).toFixed(1));
+      estimatedClasses = Math.round(watchCredits * (diffDays / 7));
+    }
+  }
 
   if (!isOpen) {
     return (
@@ -87,14 +145,14 @@ export function AddSubjectForm({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/40 backdrop-blur-md overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/40 backdrop-blur-md overflow-hidden"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           handleClose();
         }
       }}
     >
-      <div className="glass-card rounded-2xl p-8 border border-primary/20 w-full max-w-lg shadow-2xl relative">
+      <div className="glass-card rounded-2xl p-8 border border-primary/20 w-full max-w-lg max-h-[90vh] overflow-y-auto custom-scrollbar shadow-2xl relative my-8">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-foreground">
             Add New Subject
@@ -109,7 +167,12 @@ export function AddSubjectForm({
           </button>
         </div>
 
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6" noValidate>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-6"
+          noValidate
+        >
+          {/* Subject Name */}
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">
               Subject Name
@@ -120,31 +183,126 @@ export function AddSubjectForm({
               placeholder="e.g., Data Structures"
               className="w-full px-4 py-3 rounded-lg bg-input border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none transition-all"
             />
-            <p className="text-red-500 text-sm">
+            <p className="text-red-500 text-sm mt-1">
               {form.formState.errors.name?.message}
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Credits
-              </label>
-              <input
-                type="number"
-                step="any"
-                {...form.register("credits", {
-                  valueAsNumber: true,
-                })}
-                placeholder="e.g., 4"
-                className="w-full px-4 py-3 rounded-lg bg-input border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none transition-all"
-              />
-              <p className="text-red-500 text-sm">
-                {form.formState.errors.credits?.message}
-              </p>
-            </div>
+          {/* Credits */}
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-2">
+              Credits
+            </label>
+            <input
+              type="number"
+              step="any"
+              {...form.register("credits", {
+                valueAsNumber: true,
+              })}
+              placeholder="e.g., 4"
+              className="w-full px-4 py-3 rounded-lg bg-input border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none transition-all"
+            />
+            <p className="text-red-500 text-sm mt-1">
+              {form.formState.errors.credits?.message}
+            </p>
+          </div>
 
-            <div>
+          {/* Setup Method Selector */}
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-3">
+              Planned Classes Setup
+            </label>
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                type="button"
+                onClick={() => form.setValue("setupMethod", "automatic")}
+                className={`px-4 py-3 rounded-xl border text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-primary ${
+                  watchSetupMethod === "automatic"
+                    ? "bg-primary text-primary-foreground border-primary shadow-md hover:bg-primary/95 scale-[1.02]"
+                    : "bg-input border-border text-muted-foreground hover:text-foreground hover:bg-secondary/40"
+                }`}
+              >
+                Estimate Automatically
+              </button>
+              <button
+                type="button"
+                onClick={() => form.setValue("setupMethod", "manual")}
+                className={`px-4 py-3 rounded-xl border text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-primary ${
+                  watchSetupMethod === "manual"
+                    ? "bg-primary text-primary-foreground border-primary shadow-md hover:bg-primary/95 scale-[1.02]"
+                    : "bg-input border-border text-muted-foreground hover:text-foreground hover:bg-secondary/40"
+                }`}
+              >
+                Enter Manually
+              </button>
+            </div>
+            <p className="text-red-500 text-sm mt-1">
+              {form.formState.errors.setupMethod?.message}
+            </p>
+          </div>
+
+          {/* Conditional Layout based on Setup Method */}
+          {watchSetupMethod === "automatic" ? (
+            <div className="space-y-6 transition-all duration-300">
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    Semester Start Date
+                  </label>
+                  <input
+                    type="date"
+                    {...form.register("semesterStartDate")}
+                    className="w-full px-4 py-3 rounded-lg bg-input border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none transition-all"
+                  />
+                  <p className="text-red-500 text-sm mt-1">
+                    {form.formState.errors.semesterStartDate?.message}
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    Semester End Date
+                  </label>
+                  <input
+                    type="date"
+                    {...form.register("semesterEndDate")}
+                    className="w-full px-4 py-3 rounded-lg bg-input border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none transition-all"
+                  />
+                  <p className="text-red-500 text-sm mt-1">
+                    {form.formState.errors.semesterEndDate?.message}
+                  </p>
+                </div>
+              </div>
+
+              {/* Dynamic preview banner */}
+              {estimatedClasses > 0 && (
+                <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 text-sm text-foreground flex items-start gap-3 transition-all duration-300">
+                  <Calendar className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+                  <div className="flex flex-col gap-1">
+                    <span className="font-semibold text-primary">
+                      Estimation Preview
+                    </span>
+                    <p className="text-muted-foreground">
+                      Based on a semester length of{" "}
+                      <span className="text-foreground font-semibold">
+                        {weeksCount} weeks
+                      </span>{" "}
+                      and{" "}
+                      <span className="text-foreground font-semibold">
+                        {watchCredits} credits
+                      </span>
+                      , we estimate{" "}
+                      <span className="text-primary font-bold">
+                        {estimatedClasses}
+                      </span>{" "}
+                      total planned classes.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="transition-all duration-300">
               <label className="block text-sm font-medium text-foreground mb-2">
                 Total Classes
               </label>
@@ -157,14 +315,66 @@ export function AddSubjectForm({
                 placeholder="e.g., 60"
                 className="w-full px-4 py-3 rounded-lg bg-input border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none transition-all"
               />
-
-              <p className="text-red-500 text-sm">
+              <p className="text-red-500 text-sm mt-1">
                 {form.formState.errors.totalClasses?.message}
               </p>
             </div>
-          </div>
+          )}
 
-          <div className="flex gap-4 pt-4">
+          {/* Optional Attendance Import Section */}
+          {showAttendanceImport && (
+            <div className="border-t border-border/50 pt-6 space-y-4 transition-all duration-300">
+              <div>
+                <h3 className="text-lg font-semibold text-foreground">
+                  Import Current Attendance (Optional)
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  Initialize this subject with your current class counts if the semester has already started.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    Conducted Classes
+                  </label>
+                  <input
+                    type="number"
+                    step="any"
+                    {...form.register("conductedClasses", {
+                      valueAsNumber: true,
+                    })}
+                    placeholder="e.g., 12"
+                    className="w-full px-4 py-3 rounded-lg bg-input border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none transition-all"
+                  />
+                  <p className="text-red-500 text-sm mt-1">
+                    {form.formState.errors.conductedClasses?.message}
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    Present Classes
+                  </label>
+                  <input
+                    type="number"
+                    step="any"
+                    {...form.register("presentClasses", {
+                      valueAsNumber: true,
+                    })}
+                    placeholder="e.g., 10"
+                    className="w-full px-4 py-3 rounded-lg bg-input border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none transition-all"
+                  />
+                  <p className="text-red-500 text-sm mt-1">
+                    {form.formState.errors.presentClasses?.message}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Form Actions */}
+          <div className="flex gap-4 pt-4 border-t border-border/30">
             <button
               type="submit"
               disabled={createSubjectMutation.isPending}

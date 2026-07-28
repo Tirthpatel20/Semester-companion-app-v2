@@ -1,6 +1,6 @@
 'use client'
 
-import { TrendingUp, TrendingDown, Trash2, Pencil } from 'lucide-react'
+import { TrendingUp, TrendingDown, Trash2, Pencil, CheckCircle2, XCircle, Ban, Sparkles } from 'lucide-react'
 
 interface SubjectCardProps {
   name: string
@@ -9,6 +9,9 @@ interface SubjectCardProps {
   canSkip: number
   needFor75: number
   trend: 'up' | 'down' | 'stable'
+  todayStatus?: 'Present' | 'Absent' | 'Cancelled'
+  onMarkAttendance?: (status: 'Present' | 'Absent' | 'Cancelled') => void
+  isCompleted?: boolean
   onEdit?: () => void
   onDelete?: () => void
 }
@@ -20,6 +23,9 @@ export function SubjectCard({
   canSkip,
   needFor75,
   trend,
+  todayStatus,
+  onMarkAttendance,
+  isCompleted = false,
   onEdit,
   onDelete,
 }: SubjectCardProps) {
@@ -129,6 +135,81 @@ export function SubjectCard({
           </span>
         </div>
       </div>
+
+      {onMarkAttendance && (
+        <div className="mt-5 pt-4 border-t border-border/50 flex flex-col gap-2 relative z-10">
+          {isCompleted ? (
+            <div className="flex items-center justify-center py-2.5 px-3 bg-primary/10 border border-primary/20 text-primary rounded-xl text-xs font-bold gap-1.5 animate-pulse">
+              <Sparkles className="w-3.5 h-3.5" />
+              All planned classes completed!
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-muted-foreground">Today's Attendance</span>
+                {todayStatus && (
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-secondary/50 border border-border/50 text-foreground">
+                    Marked: {todayStatus}
+                  </span>
+                )}
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onMarkAttendance("Present");
+                  }}
+                  className={`flex items-center justify-center gap-1.5 py-2 px-1 rounded-xl text-[11px] font-bold transition-all hover:scale-[1.03] active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none ${
+                    todayStatus === "Present"
+                      ? "bg-primary text-primary-foreground shadow-md"
+                      : "bg-secondary/20 text-muted-foreground hover:text-foreground hover:bg-secondary/50 border border-border/30"
+                  }`}
+                  title="Mark Present"
+                  aria-label="Mark Present"
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  Present
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onMarkAttendance("Absent");
+                  }}
+                  className={`flex items-center justify-center gap-1.5 py-2 px-1 rounded-xl text-[11px] font-bold transition-all hover:scale-[1.03] active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-destructive focus-visible:outline-none ${
+                    todayStatus === "Absent"
+                      ? "bg-destructive text-white shadow-md"
+                      : "bg-secondary/20 text-muted-foreground hover:text-destructive hover:bg-destructive/10 border border-border/30"
+                  }`}
+                  title="Mark Absent"
+                  aria-label="Mark Absent"
+                >
+                  <XCircle className="w-3.5 h-3.5" />
+                  Absent
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onMarkAttendance("Cancelled");
+                  }}
+                  className={`flex items-center justify-center gap-1.5 py-2 px-1 rounded-xl text-[11px] font-bold transition-all hover:scale-[1.03] active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-muted focus-visible:outline-none border border-border/30 ${
+                    todayStatus === "Cancelled"
+                      ? "bg-muted-foreground/30 text-foreground shadow-md"
+                      : "bg-secondary/20 text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                  }`}
+                  title="Mark Cancelled"
+                  aria-label="Mark Cancelled"
+                >
+                  <Ban className="w-3.5 h-3.5" />
+                  Cancel
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
     </div>
   )
 }

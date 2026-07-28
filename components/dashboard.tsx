@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { BookOpen, AlertCircle, Zap, Trash2 } from "lucide-react";
 
 import { deleteSubject } from "@/services/subjects";
+import { markAttendance } from "@/services/attendance";
 
 import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -52,6 +53,34 @@ export default function Dashboard() {
 
     onError: (error) => {
       toast.error(error.message);
+    },
+  });
+
+  const markAttendanceMutation = useMutation({
+    mutationFn: ({
+      subjectId,
+      status,
+    }: {
+      subjectId: number;
+      status: "Present" | "Absent" | "Cancelled";
+    }) => markAttendance(subjectId, status),
+
+    onSuccess: (_, variables) => {
+      toast.success("Attendance updated successfully.");
+
+      queryClient.invalidateQueries({
+        queryKey: ["dashboard"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["attendance", variables.subjectId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["subject", variables.subjectId],
+      });
+    },
+
+    onError: (error: any) => {
+      toast.error(error.message || "Failed to mark attendance.");
     },
   });
 
@@ -151,19 +180,19 @@ export default function Dashboard() {
       label: "Overall Attendance",
       value: stats.overallAttendance,
       unit: "%",
-      variant: stats.overallAttendance >= 75 ? "success" : "warning",
+      variant: (stats.overallAttendance >= 75 ? "success" : "warning") as "success" | "warning",
       icon: <BookOpen className="w-5 h-5 text-primary" />,
     },
     {
       label: "Total Subjects",
       value: stats.totalSubjects,
-      variant: "default",
+      variant: "default" as "default",
       icon: <BookOpen className="w-5 h-5 text-primary" />,
     },
     {
       label: "Below 75%",
       value: stats.below75,
-      variant: stats.below75 > 0 ? "warning" : "success",
+      variant: (stats.below75 > 0 ? "warning" : "success") as "warning" | "success",
       icon: <AlertCircle className="w-5 h-5 text-destructive" />,
     },
   ];
@@ -186,6 +215,7 @@ export default function Dashboard() {
                 credits: editingSubject.credits,
                 totalClasses: editingSubject.totalClasses,
               }}
+              conductedClasses={editingSubject.stats?.completedClasses || 0}
               onClose={() => setEditingSubject(null)}
             />
           ) : (
@@ -239,29 +269,46 @@ export default function Dashboard() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {subjects.map((subject: any) => (
-                <Link
-                  key={subject.id}
-                  href={`/subject/${subject.id}`}
-                  className="block hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded-2xl"
-                >
-                  <SubjectCard
-                    name={subject.name}
-                    credits={subject.credits}
-                    attendance={subject.stats.attendancePercentage}
-                    canSkip={subject.stats.classesCanSkip ?? 0}
-                    needFor75={subject.stats.classesNeeded ?? 0}
-                    trend="stable"
-                    onEdit={() => {
-                      setEditingSubject(subject);
-                      window.scrollTo({ top: 0, behavior: "smooth" });
-                    }}
-                    onDelete={() => {
-                      setSubjectToDelete(subject);
-                    }}
-                  />
-                </Link>
-              ))}
+              {subjects.map((subject: any) => {
+                const today = new Date().toISOString().split("T")[0];
+                const todayRecord = subject.attendanceRecords?.find(
+                  (r: any) => r.attendanceDate === today
+                );
+                const todayStatus = todayRecord?.status;
+                const isCompleted = subject.stats?.completedClasses >= (subject.totalClasses - (subject.stats?.cancelled ?? 0));
+
+                return (
+                  <Link
+                    key={subject.id}
+                    href={`/subject/${subject.id}`}
+                    className="block hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded-2xl"
+                  >
+                    <SubjectCard
+                      name={subject.name}
+                      credits={subject.credits}
+                      attendance={subject.stats.attendancePercentage}
+                      canSkip={subject.stats.classesCanSkip ?? 0}
+                      needFor75={subject.stats.classesNeeded ?? 0}
+                      trend="stable"
+                      todayStatus={todayStatus}
+                      isCompleted={isCompleted}
+                      onMarkAttendance={(status) =>
+                        markAttendanceMutation.mutate({
+                          subjectId: subject.id,
+                          status,
+                        })
+                      }
+                      onEdit={() => {
+                        setEditingSubject(subject);
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                      onDelete={() => {
+                        setSubjectToDelete(subject);
+                      }}
+                    />
+                  </Link>
+                );
+              })}
             </div>
           )}
         </section>

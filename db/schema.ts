@@ -59,7 +59,7 @@ export const attendanceRecords = pgTable(
     unique().on(table.subjectId, table.attendanceDate),
     check(
       "valid_attendance_status",
-      sql`${table.status} IN ('Present', 'Absent')`,
+      sql`${table.status} IN ('Present', 'Absent', 'Cancelled')`,
     ),
   ],
 );

@@ -5,9 +5,9 @@ import { Plus, X } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  CreateSubjectFormValues,
-  createSubjectSchema,
-  type CreateSubjectInput,
+  EditSubjectFormValues,
+  editSubjectSchema,
+  type EditSubjectInput,
 } from "@/lib/validations/create-subject";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateSubject } from "@/services/subjects";
@@ -16,7 +16,9 @@ import { toast } from "sonner";
 interface EditSubjectFormProps {
   subjectId: number;
 
-  defaultValues: CreateSubjectInput;
+  defaultValues: EditSubjectInput;
+
+  conductedClasses?: number;
 
   onClose?: () => void;
 }
@@ -24,6 +26,7 @@ interface EditSubjectFormProps {
 export function EditSubjectForm({
   subjectId,
   defaultValues,
+  conductedClasses,
   onClose,
 }: EditSubjectFormProps) {
   
@@ -31,7 +34,7 @@ export function EditSubjectForm({
   const queryClient = useQueryClient();
 
   const updateSubjectMutation = useMutation({
-    mutationFn: (data: CreateSubjectInput) => updateSubject(subjectId, data),
+    mutationFn: (data: EditSubjectInput) => updateSubject(subjectId, data),
 
     onSuccess: () => {
       toast.success("Subject updated successfully.");
@@ -56,12 +59,30 @@ export function EditSubjectForm({
     },
   });
 
-  const onSubmit = (data: CreateSubjectInput) => {
-    updateSubjectMutation.mutate(data);
+  const onSubmit = (data: EditSubjectFormValues) => {
+    try {
+      const parsed = editSubjectSchema.parse(data);
+
+      if (
+        conductedClasses !== undefined &&
+        parsed.totalClasses !== undefined &&
+        parsed.totalClasses <= conductedClasses
+      ) {
+        form.setError("totalClasses", {
+          type: "manual",
+          message: `Total classes must be greater than conducted classes (${conductedClasses}).`,
+        });
+        return;
+      }
+
+      updateSubjectMutation.mutate(parsed);
+    } catch (e: any) {
+      toast.error("Form validation failed. Please check your inputs.");
+    }
   };
 
-  const form = useForm<CreateSubjectFormValues>({
-    resolver: zodResolver(createSubjectSchema),
+  const form = useForm<EditSubjectFormValues>({
+    resolver: zodResolver(editSubjectSchema) as any,
     defaultValues: defaultValues,
   });
 
@@ -72,14 +93,14 @@ export function EditSubjectForm({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/40 backdrop-blur-md overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/40 backdrop-blur-md overflow-hidden"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           handleClose();
         }
       }}
     >
-      <div className="glass-card rounded-2xl p-8 border border-primary/20 w-full max-w-lg shadow-2xl relative">
+      <div className="glass-card rounded-2xl p-8 border border-primary/20 w-full max-w-lg max-h-[90vh] overflow-y-auto custom-scrollbar shadow-2xl relative">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-foreground">Edit Subject</h2>
           <button

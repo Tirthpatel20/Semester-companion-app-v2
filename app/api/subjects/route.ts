@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { subjects } from "@/db/schema";
+import { subjects, attendanceRecords } from "@/db/schema";
 import { requireSession } from "@/lib/require-session";
 import { createSubjectSchema } from "@/lib/validations/create-subject";
 import { eq } from "drizzle-orm";
@@ -41,6 +41,31 @@ export async function POST(request: Request) {
           userId: session.user.id,
         })
         .returning();
+
+      // Handle optional attendance import
+      if (body.conductedClasses && body.conductedClasses > 0) {
+        const conducted = body.conductedClasses;
+        const present = body.presentClasses ?? 0;
+
+        const attendanceRecordsToInsert = [];
+        const now = new Date();
+        for (let i = 0; i < conducted; i++) {
+          const d = new Date(now);
+          d.setDate(d.getDate() - i);
+          const attendanceDate = d.toISOString().split("T")[0];
+          const status = i < present ? "Present" : "Absent";
+
+          attendanceRecordsToInsert.push({
+            subjectId: subject.id,
+            attendanceDate,
+            status,
+          });
+        }
+
+        if (attendanceRecordsToInsert.length > 0) {
+          await db.insert(attendanceRecords).values(attendanceRecordsToInsert);
+        }
+      }
 
       return Response.json(
         {
